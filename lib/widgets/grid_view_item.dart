@@ -31,7 +31,13 @@ class GridViewItem extends StatelessWidget {
               child: Icon(iconData,color: color,),
             ),
           ),
-          Text(title,style: TextStyle(color: Colors.black54,fontWeight: FontWeight.w700,fontSize: 18),)
+          Text(title,
+            style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+            ),
+          ),
         ],
       ),
     );
