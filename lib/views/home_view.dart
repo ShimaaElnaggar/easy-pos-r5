@@ -1,5 +1,6 @@
 
 import 'package:easy_pos_r5/widgets/card_header_item.dart';
+import 'package:easy_pos_r5/widgets/grid_view_item.dart';
 import 'package:easy_pos_r5/widgets/row_header.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xfffafafa),
       drawer: const Drawer(),
       appBar:AppBar(),
       body: Column(
@@ -30,7 +32,7 @@ class _HomeViewState extends State<HomeView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RowHeader(),
-                        const SizedBox(height: 12,),
+                        SizedBox(height: 12,),
                         CardHeaderItem(
                           title: "Exchange Rate",
                           subTitle: "1 USD = 50 Egp",
@@ -45,6 +47,43 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
             ],
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: GridView.count(
+                  crossAxisCount:2,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 20,
+                children: const [
+                  GridViewItem(
+                    iconData: Icons.calculate,
+                    color: Colors.orange,
+                    title: "All Sales",
+                  ),
+                  GridViewItem(
+                    iconData: Icons.inventory_2,
+                    color: Colors.pink,
+                    title: "Products",
+                  ),
+                  GridViewItem(
+                    iconData: Icons.groups,
+                    color: Colors.lightBlue,
+                    title: "Clients",
+                  ),
+                  GridViewItem(
+                    iconData: Icons.point_of_sale,
+                    color: Colors.green,
+                    title: "New Sale",
+                  ),
+                  GridViewItem(
+                    iconData: Icons.category,
+                    color: Colors.yellow,
+                    title: "Categories",
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
