@@ -1,6 +1,10 @@
+import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  var sqlHelper = SqlHelper();
+  sqlHelper.init();
   runApp(const MyApp());
 }
 
