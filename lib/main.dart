@@ -23,26 +23,35 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Easy Pos',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xff0157db),
+          foregroundColor: Colors.white,
+        ),
+        colorScheme: ColorScheme.fromSwatch(
+          backgroundColor: Colors.white  ,
+          cardColor: Colors.blue.shade100,
+          errorColor: Colors.red,
+          primarySwatch: getMaterialColor(
+            Color(0xff0157db),
+          ),
+        ),
       ),
       home: const HomeView(),
     );
+  }
+  MaterialColor getMaterialColor(Color color) {
+    final int red = color.red;
+    final int green = color.green;
+    final int blue = color.blue;
+    final int alpha = color.alpha;
+
+    final Map<int, Color> shades = {
+      50: Color.fromARGB(alpha, red, green, blue),
+      100: Color.fromARGB(alpha, red, green, blue),
+      // Add more shades as needed (e.g., 200, 300, etc.)
+    };
+
+    return MaterialColor(color.value, shades);
   }
 }
 
