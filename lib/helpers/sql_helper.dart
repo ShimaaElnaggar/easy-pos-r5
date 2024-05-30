@@ -35,7 +35,7 @@ class SqlHelper{
         CREATE TABLE IF NOT EXISTS categories (
             id INTEGER PRIMARY KEY ,
             name TEXT NOT NULL,
-            description TEXT NOT NULL,
+            description TEXT NOT NULL
         )
         ''');
 
@@ -48,7 +48,7 @@ class SqlHelper{
             stock INTEGER NOT NULL,
             iaAvailable BOOLEAN NOT NULL,
             image BLOB,
-            categoryId INTEGER NOT NULL,
+            categoryId INTEGER NOT NULL
         )
         ''');
 
