@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Easy Pos',
       theme: ThemeData(
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xff0157db),
           foregroundColor: Colors.white,
         ),
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           cardColor: Colors.blue.shade100,
           errorColor: Colors.red,
           primarySwatch: getMaterialColor(
-            Color(0xff0157db),
+            const Color(0xff0157db),
           ),
         ),
       ),
