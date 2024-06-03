@@ -102,31 +102,36 @@ class _HomeViewState extends State<HomeView> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 20,
-                children: const [
+                children:  [
                   GridViewItem(
                     iconData: Icons.calculate,
                     color: Colors.orange,
                     title: "All Sales",
+                    onTab: () {  },
                   ),
                   GridViewItem(
                     iconData: Icons.inventory_2,
                     color: Colors.pink,
                     title: "Products",
+                    onTab: () {  },
                   ),
                   GridViewItem(
                     iconData: Icons.groups,
                     color: Colors.lightBlue,
                     title: "Clients",
+                    onTab: () {  },
                   ),
                   GridViewItem(
                     iconData: Icons.point_of_sale,
                     color: Colors.green,
                     title: "New Sale",
+                    onTab: () {  },
                   ),
                   GridViewItem(
                     iconData: Icons.category,
                     color: Colors.yellow,
                     title: "Categories",
+                    onTab: () {  },
                   ),
                 ],
               ),
