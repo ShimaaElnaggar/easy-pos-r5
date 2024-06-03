@@ -76,7 +76,7 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
     try {
       if (formKey.currentState!.validate()) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
-        await sqlHelper.db!.insert("Categories", {
+        await sqlHelper.db!.insert("categories", {
           "name": categoryNameController.text,
           "description": descController.text,
         });
@@ -89,7 +89,7 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
             ),
           ),
         );
-        Navigator.pop(context);
+        Navigator.pop(context,true); //refresh categories page
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

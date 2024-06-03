@@ -1,7 +1,8 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
-import 'package:easy_pos_r5/views/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+
+import 'views/home_view.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,15 +1,15 @@
 class CategoryData{
   int? id;
-  String? categoryName;
+  String? name;
   String? description;
 
   CategoryData.fromJson( Map<String,dynamic> data){
     id = data["id"];
-    categoryName = data["categoryName"];
+    name = data["name"];
     description = data["description"];
   }
 
   Map<String,dynamic> toJson (){
-    return{"id" : id , "categoryName" : categoryName , "description" : description};
+    return{"id" : id , "name" : name , "description" : description};
 }
 }

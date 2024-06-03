@@ -16,7 +16,7 @@ class SqlHelper{
       } else
       {
         db =  await openDatabase(
-            'customers.db',
+            'posDgetb.db',
             version : 1,
             onCreate: ( Database db , int version ){
               print("Database created successfully");
@@ -64,12 +64,12 @@ class SqlHelper{
 
       print("Tables created Successfully!");
       var result = await batch.commit();
-      print("result: $result");
+          print("Result: $result");
+
 
     }catch(error){
       print("Error in creating tables: $error");
     }
     return true;
   }
-
 }
