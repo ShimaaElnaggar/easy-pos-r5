@@ -25,7 +25,8 @@ class CardHeaderItem extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title,
+              Text(
+                title,
                 style: const TextStyle(
                     color: Colors.white,
                   fontSize: 18,
@@ -37,7 +38,7 @@ class CardHeaderItem extends StatelessWidget {
                 style: const  TextStyle(
                 color: Colors.white,
                 fontSize: 15,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w200,
               ),),
             ],
           ),

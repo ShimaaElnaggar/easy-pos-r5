@@ -2,6 +2,7 @@ import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/views/categories_view.dart';
 import 'package:easy_pos_r5/widgets/card_header_item.dart';
 import 'package:easy_pos_r5/widgets/grid_view_item.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -20,14 +21,12 @@ class _HomeViewState extends State<HomeView> {
     initTables();
     super.initState();
   }
-  void initTables()async{
+
+  void initTables() async {
     var sqlHelper = GetIt.I.get<SqlHelper>();
     isTableInitialized = await sqlHelper.createTables();
     isLoading = false;
-    setState(() {
-
-    });
-
+    setState(() {});
   }
 
   @override
@@ -42,14 +41,16 @@ class _HomeViewState extends State<HomeView> {
             children: [
               Expanded(
                 child: Container(
-                  height: MediaQuery.of(context).size.height / 3 + 18,
+                  height:
+                  kIsWeb? MediaQuery.of(context).size.height / 3 + 65 :
+                  MediaQuery.of(context).size.height / 3 + 18,
                   color: Theme.of(context).primaryColor,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 15),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         Row(
                           children: [
                             const Text(
@@ -61,19 +62,20 @@ class _HomeViewState extends State<HomeView> {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
                               child: Transform.scale(
-                                  scale: 0.5,
-                                  child: isLoading
-                                      ? const CircularProgressIndicator(
-                                          color: Colors.white,
-                                        )
-                                      : CircleAvatar(
-                                          radius: 10,
-                                          backgroundColor: isTableInitialized
-                                              ? Colors.green
-                                              : Colors.red,
-                                        ),
+                                scale: 0.5,
+                                child: isLoading
+                                    ? const CircularProgressIndicator(
+                                        color: Colors.white,
+                                      )
+                                    : CircleAvatar(
+                                        radius: 10,
+                                        backgroundColor: isTableInitialized
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
                               ),
                             ),
                           ],
@@ -82,11 +84,11 @@ class _HomeViewState extends State<HomeView> {
                           height: 12,
                         ),
                         const CardHeaderItem(
-                          title: "Exchange Rate",
+                          title: "Exchange rate",
                           subTitle: "1 USD = 50 Egp",
                         ),
                         const CardHeaderItem(
-                          title: "Today's Sales",
+                          title: "Today's sales",
                           subTitle: "1000 EGP",
                         ),
                       ],
@@ -103,37 +105,39 @@ class _HomeViewState extends State<HomeView> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 20,
-                children:  [
+                children: [
                   GridViewItem(
                     iconData: Icons.calculate,
                     color: Colors.orange,
                     title: "All Sales",
-                    onTab: () {  },
+                    onTab: () {},
                   ),
                   GridViewItem(
                     iconData: Icons.inventory_2,
                     color: Colors.pink,
                     title: "Products",
-                    onTab: () {  },
+                    onTab: () {},
                   ),
                   GridViewItem(
                     iconData: Icons.groups,
                     color: Colors.lightBlue,
                     title: "Clients",
-                    onTab: () {  },
+                    onTab: () {},
                   ),
                   GridViewItem(
                     iconData: Icons.point_of_sale,
                     color: Colors.green,
                     title: "New Sale",
-                    onTab: () {  },
+                    onTab: () {},
                   ),
                   GridViewItem(
                     iconData: Icons.category,
                     color: Colors.yellow,
                     title: "Categories",
                     onTab: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CategoriesView(),));
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const CategoriesView(),
+                      ));
                     },
                   ),
                 ],
