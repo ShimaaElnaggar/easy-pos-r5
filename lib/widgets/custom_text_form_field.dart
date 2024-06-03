@@ -6,6 +6,7 @@ class CustomTextFormField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final IconButton? suffixIcon;
+  final String? Function(String?)? validator;
 
   const CustomTextFormField(
       {this.suffixIcon,
@@ -13,6 +14,7 @@ class CustomTextFormField extends StatelessWidget {
       required this.keyboardType,
       required this.label,
       required this.controller,
+      required this.validator,
       super.key});
 
   @override
@@ -39,12 +41,7 @@ class CustomTextFormField extends StatelessWidget {
           borderSide: BorderSide(color: Colors.red, width: 2),
         ),
       ),
-      validator: (value) {
-        if (value!.isEmpty) {
-          return " Please enter the valid $label ";
-        }
-        return null;
-      },
+      validator: validator,
     );
   }
 }
