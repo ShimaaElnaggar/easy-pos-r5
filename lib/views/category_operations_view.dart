@@ -1,8 +1,8 @@
-
+import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/widgets/custom_elevated_button.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get_it/get_it.dart';
 
 class CategoryOperationsView extends StatefulWidget {
   const CategoryOperationsView({super.key});
@@ -60,7 +60,9 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
                 height: 20,
               ),
               CustomElevatedButton(
-                onPressed: onSubmit,
+                onPressed: () async {
+                  await onSubmit();
+                },
                 title: "Submit",
               ),
             ],
@@ -70,7 +72,34 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
     );
   }
 
-  void onSubmit() {
+  Future<void> onSubmit() async {
+    try {
+      if (formKey.currentState!.validate()) {
+        var sqlHelper = GetIt.I.get<SqlHelper>();
+        await sqlHelper.db!.insert("Categories", {
+          "name": categoryNameController.text,
+          "description": descController.text,
+        });
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(
+              "Category added Successfully",
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            "Error in creating Category : $e",
+          ),
+        ),
+      );
+    }
   }
 }
