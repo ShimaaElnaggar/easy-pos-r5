@@ -11,6 +11,16 @@ class CategoriesView extends StatefulWidget {
 class _CategoriesViewState extends State<CategoriesView> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return  Scaffold(
+      appBar:AppBar(
+        title: const Text("Categories",style: TextStyle(fontSize: 20),),
+        actions: [
+          IconButton(
+              onPressed: (){},
+              icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
+    );
   }
 }
