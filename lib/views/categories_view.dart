@@ -1,5 +1,6 @@
 
 import 'package:data_table_2/data_table_2.dart';
+import 'package:easy_pos_r5/views/category_operations_view.dart';
 import 'package:flutter/material.dart';
 
 class CategoriesView extends StatefulWidget {
@@ -18,7 +19,9 @@ class _CategoriesViewState extends State<CategoriesView> {
         title: const Text("Categories",style: TextStyle(fontSize: 22),),
         actions: [
           IconButton(
-              onPressed: (){},
+              onPressed: (){
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const CategoryOperationsView()));
+              },
               icon: const Icon(Icons.add),
           ),
         ],
