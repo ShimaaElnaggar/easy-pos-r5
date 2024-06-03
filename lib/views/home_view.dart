@@ -1,4 +1,5 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
+import 'package:easy_pos_r5/views/categories_view.dart';
 import 'package:easy_pos_r5/widgets/card_header_item.dart';
 import 'package:easy_pos_r5/widgets/grid_view_item.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +132,9 @@ class _HomeViewState extends State<HomeView> {
                     iconData: Icons.category,
                     color: Colors.yellow,
                     title: "Categories",
-                    onTab: () {  },
+                    onTab: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CategoriesView(),));
+                    },
                   ),
                 ],
               ),
