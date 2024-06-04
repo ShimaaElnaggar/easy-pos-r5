@@ -58,14 +58,15 @@ class _CategoriesViewState extends State<CategoriesView> {
         ),
         actions: [
           IconButton(
-            onPressed: () async{
-              var  result = await Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const CategoryOperationsView()),);
-              if ( result ?? false) {
+            onPressed: () async {
+              var result = await Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => const CategoryOperationsView()),
+              );
+              if (result ?? false) {
                 getCategories(); // Refresh categories list
               }
             },
-
             icon: const Icon(Icons.add),
           ),
         ],
@@ -88,7 +89,8 @@ class _CategoriesViewState extends State<CategoriesView> {
           DataColumn(label: Text("Description")),
           DataColumn(label: Center(child: Text("Actions"))),
         ],
-        source: MyDataTableSource(categoriesList: categories),
+        source: MyDataTableSource(
+            categoriesList: categories, getCategories: getCategories),
       ),
     );
   }
@@ -96,7 +98,9 @@ class _CategoriesViewState extends State<CategoriesView> {
 
 class MyDataTableSource extends DataTableSource {
   List<CategoryData>? categoriesList;
-  MyDataTableSource({required this.categoriesList});
+  void Function() getCategories;
+  MyDataTableSource(
+      {required this.categoriesList, required this.getCategories});
   @override
   DataRow? getRow(int index) {
     return DataRow2(cells: [
@@ -104,15 +108,36 @@ class MyDataTableSource extends DataTableSource {
       DataCell(Text("${categoriesList?[index].name}")),
       DataCell(Text("${categoriesList?[index].description}")),
       DataCell(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(onPressed: (){}, icon: const Icon(Icons.edit)),
-              IconButton(onPressed: (){}, icon: const Icon(Icons.delete,color: Colors.red,)),
-            ],
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
+            IconButton(
+                onPressed: () {
+                  onDeleteRow(categoriesList ? [index].id ?? 0);
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                )),
+          ],
+        ),
       ),
     ]);
+  }
+
+  Future<void> onDeleteRow(int id) async {
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var result = await sqlHelper.db!
+          .delete('categories', where: 'id =?', whereArgs: [id]);
+      if (result > 0) {
+        getCategories();
+        print("Row deleted Successfully!");
+      }
+    } catch (e) {
+      print("Error in deleting row : $e");
+    }
   }
 
   @override
