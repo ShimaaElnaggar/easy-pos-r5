@@ -1,6 +1,7 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/views/category_operations_view.dart';
+import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../models/category_data_model.dart';
@@ -71,26 +72,57 @@ class _CategoriesViewState extends State<CategoriesView> {
           ),
         ],
       ),
-      body: PaginatedDataTable2(
-        renderEmptyRowsInTheEnd: false,
-        minWidth: 600, // to be scrollable
-        isHorizontalScrollBarVisible: true,
-        border: TableBorder.all(),
-        wrapInCard: false,
-        headingRowColor: WidgetStatePropertyAll(Theme.of(context).primaryColor),
-        headingTextStyle: const TextStyle(color: Colors.white, fontSize: 18),
-        rowsPerPage: 15,
-        columnSpacing: 20,
-        horizontalMargin: 20,
-        empty: const Center(child: Text("No Data Found!")),
-        columns: const [
-          DataColumn(label: Text("Id")),
-          DataColumn(label: Text("Name")),
-          DataColumn(label: Text("Description")),
-          DataColumn(label: Center(child: Text("Actions"))),
-        ],
-        source: MyDataTableSource(
-            categoriesList: categories, getCategories: getCategories),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            CustomTextFormField(
+              onChanged: (value) async {
+                var sqlHelper = GetIt.I.get<SqlHelper>();
+                var result = await sqlHelper.db!.rawQuery("""
+                 SELECT * FROM Categories
+                 WHERE name LIKE '%$value%' OR description LIKE '%$value%';
+                """);
+
+                print('values:${result}');
+              },
+              textInputAction: TextInputAction.done,
+              keyboardType: TextInputType.text,
+              border: InputBorder.none,
+              prefixIcon:
+                  IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              label: "Search",
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: PaginatedDataTable2(
+                renderEmptyRowsInTheEnd: false,
+                minWidth: 600, // to be scrollable
+                isHorizontalScrollBarVisible: true,
+                border: TableBorder.all(),
+                wrapInCard: false,
+                headingRowColor:
+                    WidgetStatePropertyAll(Theme.of(context).primaryColor),
+                headingTextStyle:
+                    const TextStyle(color: Colors.white, fontSize: 18),
+                rowsPerPage: 15,
+                columnSpacing: 20,
+                horizontalMargin: 20,
+                empty: const Center(child: Text("No Data Found!")),
+                columns: const [
+                  DataColumn(label: Text("Id")),
+                  DataColumn(label: Text("Name")),
+                  DataColumn(label: Text("Description")),
+                  DataColumn(label: Center(child: Text("Actions"))),
+                ],
+                source: MyDataTableSource(
+                    categoriesList: categories, getCategories: getCategories),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -103,27 +135,29 @@ class MyDataTableSource extends DataTableSource {
       {required this.categoriesList, required this.getCategories});
   @override
   DataRow? getRow(int index) {
-    return DataRow2(cells: [
-      DataCell(Text("${categoriesList?[index].id}")),
-      DataCell(Text("${categoriesList?[index].name}")),
-      DataCell(Text("${categoriesList?[index].description}")),
-      DataCell(
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
-            IconButton(
-                onPressed: () {
-                  onDeleteRow(categoriesList ? [index].id ?? 0);
-                },
-                icon: const Icon(
-                  Icons.delete,
-                  color: Colors.red,
-                )),
-          ],
-        ),
-      ),
-    ]);
+    return DataRow2(
+        //onSelectChanged: (value){},
+        cells: [
+          DataCell(Text("${categoriesList?[index].id}")),
+          DataCell(Text("${categoriesList?[index].name}")),
+          DataCell(Text("${categoriesList?[index].description}")),
+          DataCell(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
+                IconButton(
+                    onPressed: () {
+                      onDeleteRow(categoriesList?[index].id ?? 0);
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    )),
+              ],
+            ),
+          ),
+        ]);
   }
 
   Future<void> onDeleteRow(int id) async {
