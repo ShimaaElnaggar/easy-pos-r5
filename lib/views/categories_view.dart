@@ -3,7 +3,6 @@ import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/views/category_operations_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-
 import '../models/category_data_model.dart';
 
 class CategoriesView extends StatefulWidget {
@@ -73,7 +72,7 @@ class _CategoriesViewState extends State<CategoriesView> {
       ),
       body: PaginatedDataTable2(
         renderEmptyRowsInTheEnd: false,
-        // minWidth: 600, // to be scrollable
+        minWidth: 600, // to be scrollable
         isHorizontalScrollBarVisible: true,
         border: TableBorder.all(),
         wrapInCard: false,
@@ -87,6 +86,7 @@ class _CategoriesViewState extends State<CategoriesView> {
           DataColumn(label: Text("Id")),
           DataColumn(label: Text("Name")),
           DataColumn(label: Text("Description")),
+          DataColumn(label: Center(child: Text("Actions"))),
         ],
         source: MyDataTableSource(categoriesList: categories),
       ),
@@ -103,6 +103,15 @@ class MyDataTableSource extends DataTableSource {
       DataCell(Text("${categoriesList?[index].id}")),
       DataCell(Text("${categoriesList?[index].name}")),
       DataCell(Text("${categoriesList?[index].description}")),
+      DataCell(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(onPressed: (){}, icon: const Icon(Icons.edit)),
+              IconButton(onPressed: (){}, icon: const Icon(Icons.delete,color: Colors.red,)),
+            ],
+          ),
+      ),
     ]);
   }
 
