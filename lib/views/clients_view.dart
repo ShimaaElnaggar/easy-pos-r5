@@ -1,4 +1,5 @@
 
+import 'package:easy_pos_r5/views/clients_operations.dart';
 import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,9 @@ class _ClientsViewState extends State<ClientsView> {
         title: 'Clients',
         actions: [
           IconButton(
-              onPressed: (){},
+              onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>const ClientsOperations()));
+              },
               icon: Icon(Icons.add),
           )
         ],
