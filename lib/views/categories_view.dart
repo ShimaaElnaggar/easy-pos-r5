@@ -1,6 +1,7 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/views/category_operations_view.dart';
+import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -52,26 +53,22 @@ class _CategoriesViewState extends State<CategoriesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfffafafa),
-      appBar: AppBar(
-        title: const Text(
-          "Categories",
-          style: TextStyle(fontSize: 22),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              var result = await Navigator.push(context,
-                MaterialPageRoute(
-                    builder: (context) => const CategoryOperationsView()),
-              );
-              if (result ?? false) {
-                getCategories(); // Refresh categories list
-              }
-            },
-            icon: const Icon(Icons.add),
-          ),
-        ],
-      ),
+      appBar: CustomAppbar(
+          title: "Categories",
+          actions: [
+            IconButton(
+              onPressed: () async {
+                var result = await Navigator.push(context,
+                  MaterialPageRoute(
+                      builder: (context) => const CategoryOperationsView()),
+                );
+                if (result ?? false) {
+                  getCategories(); // Refresh categories list
+                }
+              },
+              icon: const Icon(Icons.add),
+            ),
+          ]),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
