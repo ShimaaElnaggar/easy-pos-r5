@@ -60,7 +60,7 @@ class _CategoriesViewState extends State<CategoriesView> {
         actions: [
           IconButton(
             onPressed: () async {
-              var result = await Navigator.of(context).push(
+              var result = await Navigator.push(context,
                 MaterialPageRoute(
                     builder: (context) => const CategoryOperationsView()),
               );
@@ -84,13 +84,12 @@ class _CategoriesViewState extends State<CategoriesView> {
                  WHERE name LIKE '%$value%' OR description LIKE '%$value%';
                 """);
 
-                print('values:${result}');
+                print('values:$result');
               },
               textInputAction: TextInputAction.done,
               keyboardType: TextInputType.text,
-              border: InputBorder.none,
               prefixIcon:
-                  IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+                  IconButton(onPressed: () {}, icon:  Icon(Icons.search,color: Theme.of(context).primaryColor,)),
               label: "Search",
             ),
             const SizedBox(
@@ -147,8 +146,8 @@ class MyDataTableSource extends DataTableSource {
               children: [
                 IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
                 IconButton(
-                    onPressed: () {
-                      onDeleteRow(categoriesList?[index].id ?? 0);
+                    onPressed: () async{
+                      await onDeleteRow(categoriesList?[index].id ?? 0);
                     },
                     icon: const Icon(
                       Icons.delete,

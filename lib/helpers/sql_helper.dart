@@ -2,34 +2,27 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
-class SqlHelper{
+class SqlHelper {
   Database? db;
 
   Future<void> init() async {
-    try{
-
-      if(kIsWeb){
+    try {
+      if (kIsWeb) {
         var factory = databaseFactoryFfiWeb;
-        db = await factory.openDatabase('my_db.db');
-
-
-      } else
-      {
-        db =  await openDatabase(
-            'posDgetb.db',
-            version : 1,
-            onCreate: ( Database db , int version ){
-              print("Database created successfully");
-            }
-        );
+        db = await factory.openDatabase('pos.db');
+      } else {
+        db = await openDatabase('pos.db', version: 1,
+            onCreate: (Database db, int version) {
+          print("Database created successfully");
+        });
       }
-    } catch(error){
+    } catch (error) {
       print("The error in creating database : $error");
     }
   }
 
-  Future<bool> createTables()async{
-    try{
+  Future<bool> createTables() async {
+    try {
       var batch = db!.batch();
       batch.execute('''
         CREATE TABLE IF NOT EXISTS categories (
@@ -64,12 +57,11 @@ class SqlHelper{
 
       print("Tables created Successfully!");
       var result = await batch.commit();
-          print("Result: $result");
-
-
-    }catch(error){
+      print("Result: $result");
+      return true;
+    } catch (error) {
       print("Error in creating tables: $error");
+      return false;
     }
-    return true;
   }
 }

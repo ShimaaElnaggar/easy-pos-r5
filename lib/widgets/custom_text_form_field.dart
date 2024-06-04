@@ -9,7 +9,7 @@ class CustomTextFormField extends StatelessWidget {
   final IconButton? prefixIcon;
   final void Function (String)? onChanged;
   final String? Function(String?)? validator;
-  final InputBorder ? border;
+
 
   const CustomTextFormField(
       {
@@ -18,7 +18,6 @@ class CustomTextFormField extends StatelessWidget {
         this.validator,
         this.prefixIcon,
         this.onChanged,
-        this.border,
       required this.textInputAction,
       required this.keyboardType,
       required this.label,
@@ -40,7 +39,9 @@ class CustomTextFormField extends StatelessWidget {
           borderSide:
               BorderSide(color: Theme.of(context).primaryColor, width: 2),
         ),
-        border: border,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
         ),

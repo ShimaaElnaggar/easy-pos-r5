@@ -14,10 +14,11 @@ class CategoryOperationsView extends StatefulWidget {
 class _CategoryOperationsViewState extends State<CategoryOperationsView> {
   TextEditingController categoryNameController = TextEditingController();
   TextEditingController descController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
+  var formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xfffafafa),
       appBar: AppBar(
         title: const Text("Add New"),
       ),
@@ -35,9 +36,9 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
                 validator: (value) {
                   if (value!.isEmpty) {
                     return "Category Name is required";
-                  } else {
-                    return null;
                   }
+                    return null;
+
                 },
               ),
               const SizedBox(
@@ -51,9 +52,8 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
                 validator: (value) {
                   if (value!.isEmpty) {
                     return "Description is required";
-                  } else {
-                    return null;
                   }
+                    return null;
                 },
               ),
               const SizedBox(
@@ -76,9 +76,9 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
     try {
       if (formKey.currentState!.validate()) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
-        await sqlHelper.db!.insert("categories", {
-          "name": categoryNameController.text,
-          "description": descController.text,
+        await sqlHelper.db!.insert('categories', {
+          'name': categoryNameController.text,
+          'description': descController.text,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
