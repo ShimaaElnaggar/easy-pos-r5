@@ -114,7 +114,12 @@ class _CategoriesViewState extends State<CategoriesView> {
                   DataColumn(label: Center(child: Text("Actions"))),
                 ],
                 source: MyDataTableSource(
-                    categoriesList: categories, getCategories: getCategories),
+                    categoriesList: categories,
+                    onDelete:(CategoryData){
+                      onDeleteRow(CategoryData.id!);
+                    },
+                  onUpdate:(categoryData){}
+                ),
               ),
             ),
           ],
@@ -122,13 +127,52 @@ class _CategoriesViewState extends State<CategoriesView> {
       ),
     );
   }
+  Future<void> onDeleteRow(int id) async {
+    try {
+      var dialogueResult = await showDialog(
+          context: context,
+          builder: (context){
+            return AlertDialog(
+              title: const Text("Delete Category"),
+              content: const Text("Are you sure you want to delete this category?"),
+              actions: [
+                TextButton(
+                    onPressed:(){
+                      Navigator.pop(context,false);
+                    },
+                    child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed:(){
+                    Navigator.pop(context,true);
+                  },
+                  child: const Text("Delete"),
+                ),
+              ],
+            );
+          });
+      if(dialogueResult ?? false){
+        var sqlHelper = GetIt.I.get<SqlHelper>();
+        var result = await sqlHelper.db!
+            .delete('categories', where: 'id =?', whereArgs: [id]);
+        if (result > 0) {
+          getCategories();
+          print("Row deleted Successfully!");
+        }
+      }
+
+    } catch (e) {
+      print("Error in deleting row : $e");
+    }
+  }
 }
 
 class MyDataTableSource extends DataTableSource {
   List<CategoryData>? categoriesList;
-  void Function() getCategories;
+  void Function(CategoryData) onDelete;
+  void Function(CategoryData) onUpdate;
   MyDataTableSource(
-      {required this.categoriesList, required this.getCategories});
+      {required this.categoriesList, required this.onDelete, required this.onUpdate});
   @override
   DataRow? getRow(int index) {
     return DataRow2(
@@ -141,10 +185,12 @@ class MyDataTableSource extends DataTableSource {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
+                IconButton(onPressed: () {
+                  onUpdate(categoriesList![index]);
+                }, icon: const Icon(Icons.edit)),
                 IconButton(
                     onPressed: () async{
-                      await onDeleteRow(categoriesList?[index].id ?? 0);
+                      onDelete(categoriesList![index]);
                     },
                     icon: const Icon(
                       Icons.delete,
@@ -156,19 +202,6 @@ class MyDataTableSource extends DataTableSource {
         ]);
   }
 
-  Future<void> onDeleteRow(int id) async {
-    try {
-      var sqlHelper = GetIt.I.get<SqlHelper>();
-      var result = await sqlHelper.db!
-          .delete('categories', where: 'id =?', whereArgs: [id]);
-      if (result > 0) {
-        getCategories();
-        print("Row deleted Successfully!");
-      }
-    } catch (e) {
-      print("Error in deleting row : $e");
-    }
-  }
 
   @override
   bool get isRowCountApproximate => false;
