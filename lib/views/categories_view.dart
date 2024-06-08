@@ -2,6 +2,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/views/category_operations_view.dart';
 import 'package:easy_pos_r5/widgets/custom_appbar.dart';
+import 'package:easy_pos_r5/widgets/custom_data_table.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -53,22 +54,21 @@ class _CategoriesViewState extends State<CategoriesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfffafafa),
-      appBar: CustomAppbar(
-          title: "Categories",
-          actions: [
-            IconButton(
-              onPressed: () async {
-                var result = await Navigator.push(context,
-                  MaterialPageRoute(
-                      builder: (context) => const CategoryOperationsView()),
-                );
-                if (result ?? false) {
-                  getCategories(); // Refresh categories list
-                }
-              },
-              icon: const Icon(Icons.add),
-            ),
-          ]),
+      appBar: CustomAppbar(title: "Categories", actions: [
+        IconButton(
+          onPressed: () async {
+            var result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CategoryOperationsView()),
+            );
+            if (result ?? false) {
+              getCategories(); // Refresh categories list
+            }
+          },
+          icon: const Icon(Icons.add),
+        ),
+      ]),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -85,51 +85,42 @@ class _CategoriesViewState extends State<CategoriesView> {
               },
               textInputAction: TextInputAction.done,
               keyboardType: TextInputType.text,
-              prefixIcon:
-                  IconButton(onPressed: () {}, icon:  Icon(Icons.search,color: Theme.of(context).primaryColor,)),
+              prefixIcon: IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.search,
+                    color: Theme.of(context).primaryColor,
+                  )),
               label: "Search",
             ),
             const SizedBox(
               height: 20,
             ),
             Expanded(
-              child: PaginatedDataTable2(
-                renderEmptyRowsInTheEnd: false,
-                minWidth: 600, // to be scrollable
-                isHorizontalScrollBarVisible: true,
-                border: TableBorder.all(),
-                wrapInCard: false,
-                headingRowColor:
-                    WidgetStatePropertyAll(Theme.of(context).primaryColor),
-                headingTextStyle:
-                    const TextStyle(color: Colors.white, fontSize: 18),
-                rowsPerPage: 15,
-                columnSpacing: 20,
-                horizontalMargin: 20,
-                empty: const Center(child: Text("No Data Found!")),
+              child: CustomDataTable(
                 columns: const [
                   DataColumn(label: Text("Id")),
                   DataColumn(label: Text("Name")),
                   DataColumn(label: Text("Description")),
                   DataColumn(label: Center(child: Text("Actions"))),
                 ],
-                source: MyDataTableSource(
+                source: CategoriesTableSource(
                     categoriesList: categories,
-                    onDelete:(CategoryData){
+                    onDelete: (CategoryData) {
                       onDeleteRow(CategoryData.id!);
                     },
-                  onUpdate:(CategoryData)async{
-                    var result = await Navigator.push(context,
-                      MaterialPageRoute(
-                          builder: (context) =>  CategoryOperationsView(
-                            categoryData: CategoryData,
-                          )),
-                    );
-                    if (result ?? false) {
-                      getCategories(); // Refresh categories list
-                    }
-                  }
-                ),
+                    onUpdate: (CategoryData) async {
+                      var result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CategoryOperationsView(
+                                  categoryData: CategoryData,
+                                )),
+                      );
+                      if (result ?? false) {
+                        getCategories(); // Refresh categories list
+                      }
+                    }),
               ),
             ),
           ],
@@ -137,31 +128,33 @@ class _CategoriesViewState extends State<CategoriesView> {
       ),
     );
   }
+
   Future<void> onDeleteRow(int id) async {
     try {
       var dialogueResult = await showDialog(
           context: context,
-          builder: (context){
+          builder: (context) {
             return AlertDialog(
               title: const Text("Delete Category"),
-              content: const Text("Are you sure you want to delete this category?"),
+              content:
+                  const Text("Are you sure you want to delete this category?"),
               actions: [
                 TextButton(
-                    onPressed:(){
-                      Navigator.pop(context,false);
-                    },
-                    child: const Text("Cancel"),
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text("Cancel"),
                 ),
                 TextButton(
-                  onPressed:(){
-                    Navigator.pop(context,true);
+                  onPressed: () {
+                    Navigator.pop(context, true);
                   },
                   child: const Text("Delete"),
                 ),
               ],
             );
           });
-      if(dialogueResult ?? false){
+      if (dialogueResult ?? false) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
         var result = await sqlHelper.db!
             .delete('categories', where: 'id =?', whereArgs: [id]);
@@ -170,19 +163,20 @@ class _CategoriesViewState extends State<CategoriesView> {
           print("Row deleted Successfully!");
         }
       }
-
     } catch (e) {
       print("Error in deleting row : $e");
     }
   }
 }
 
-class MyDataTableSource extends DataTableSource {
+class CategoriesTableSource extends DataTableSource {
   List<CategoryData>? categoriesList;
   void Function(CategoryData) onDelete;
   void Function(CategoryData) onUpdate;
-  MyDataTableSource(
-      {required this.categoriesList, required this.onDelete, required this.onUpdate});
+  CategoriesTableSource(
+      {required this.categoriesList,
+      required this.onDelete,
+      required this.onUpdate});
   @override
   DataRow? getRow(int index) {
     return DataRow2(
@@ -195,11 +189,13 @@ class MyDataTableSource extends DataTableSource {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(onPressed: () {
-                  onUpdate(categoriesList![index]);
-                }, icon: const Icon(Icons.edit)),
                 IconButton(
-                    onPressed: () async{
+                    onPressed: () {
+                      onUpdate(categoriesList![index]);
+                    },
+                    icon: const Icon(Icons.edit)),
+                IconButton(
+                    onPressed: () async {
                       onDelete(categoriesList![index]);
                     },
                     icon: const Icon(
@@ -211,7 +207,6 @@ class MyDataTableSource extends DataTableSource {
           ),
         ]);
   }
-
 
   @override
   bool get isRowCountApproximate => false;
