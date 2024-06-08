@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextFormField extends StatelessWidget {
-  final TextInputAction textInputAction;
-  final TextInputType keyboardType;
+  final TextInputAction? textInputAction;
+  final TextInputType? keyboardType;
   final String label;
-  final TextEditingController? controller ;
+  final TextEditingController? controller;
   final IconButton? suffixIcon;
   final IconButton? prefixIcon;
-  final void Function (String)? onChanged;
+  final List<TextInputFormatter>? inputFormatters;
+  final void Function(String)? onChanged;
   final String? Function(String?)? validator;
 
-
-  const CustomTextFormField(
-      {
-        this.suffixIcon,
-        this.controller ,
-        this.validator,
-        this.prefixIcon,
-        this.onChanged,
-      required this.textInputAction,
-      required this.keyboardType,
-      required this.label,
-      super.key,});
+  const CustomTextFormField({
+    this.suffixIcon,
+    this.controller,
+    this.validator,
+    this.prefixIcon,
+    this.onChanged,
+    this.textInputAction,
+    this.keyboardType,
+    this.inputFormatters,
+    required this.label,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      inputFormatters: inputFormatters,
       onChanged: onChanged,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       keyboardType: keyboardType,

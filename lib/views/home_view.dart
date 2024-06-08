@@ -1,6 +1,7 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/views/categories_view.dart';
 import 'package:easy_pos_r5/views/clients_view.dart';
+import 'package:easy_pos_r5/views/products_view.dart';
 import 'package:easy_pos_r5/widgets/card_header_item.dart';
 import 'package:easy_pos_r5/widgets/grid_view_item.dart';
 import 'package:flutter/foundation.dart';
@@ -33,6 +34,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       backgroundColor: const Color(0xfffafafa),
       drawer: const Drawer(),
       appBar: AppBar(),
@@ -42,9 +44,9 @@ class _HomeViewState extends State<HomeView> {
             children: [
               Expanded(
                 child: Container(
-                  height:
-                  kIsWeb? MediaQuery.of(context).size.height / 3 + 65 :
-                  MediaQuery.of(context).size.height / 3 + 18,
+                  height: kIsWeb
+                      ? MediaQuery.of(context).size.height / 3 + 82
+                      : MediaQuery.of(context).size.height / 3 + 18,
                   color: Theme.of(context).primaryColor,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -117,7 +119,12 @@ class _HomeViewState extends State<HomeView> {
                     iconData: Icons.inventory_2,
                     color: Colors.pink,
                     title: "Products",
-                    onTab: () {},
+                    onTab: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ProductsView()));
+                    },
                   ),
                   GridViewItem(
                     iconData: Icons.groups,
