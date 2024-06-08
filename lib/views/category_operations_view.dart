@@ -1,26 +1,36 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
+import 'package:easy_pos_r5/models/category_data_model.dart';
+import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:easy_pos_r5/widgets/custom_elevated_button.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 class CategoryOperationsView extends StatefulWidget {
-  const CategoryOperationsView({super.key});
+  final CategoryData? categoryData;
+  const CategoryOperationsView({this.categoryData,super.key});
 
   @override
   State<CategoryOperationsView> createState() => _CategoryOperationsViewState();
 }
-
 class _CategoryOperationsViewState extends State<CategoryOperationsView> {
-  TextEditingController categoryNameController = TextEditingController();
-  TextEditingController descController = TextEditingController();
+  TextEditingController? nameController ;
+  TextEditingController? descController ;
   var formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    nameController = TextEditingController(text: widget.categoryData?.name);
+    descController = TextEditingController(text: widget.categoryData?.description);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfffafafa),
-      appBar: AppBar(
-        title: const Text("Add New"),
+      appBar: CustomAppbar(
+        title: widget.categoryData == null ? "Add New" : "Update" ,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -31,8 +41,8 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
               CustomTextFormField(
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
-                label: "Category Name",
-                controller: categoryNameController,
+                label: "Name",
+                controller: nameController,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return "Category Name is required";
@@ -76,11 +86,22 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
     try {
       if (formKey.currentState!.validate()) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
-        await sqlHelper.db!.insert('categories', {
-          'name': categoryNameController.text,
-          'description': descController.text,
-        });
-
+        if(widget.categoryData == null){
+          await sqlHelper.db!.insert('categories', {
+            'name': nameController?.text,
+            'description': descController?.text,
+          });
+        }else{
+          await sqlHelper.db!.update('categories', {
+            'name': nameController?.text,
+            'description': descController?.text,
+          },
+            where: "id=?",
+            whereArgs: [widget.categoryData?.id],
+          );
+        }
+        final List<Map<String, dynamic>> maps = await sqlHelper.db!.query('categories');
+        print("db data: $maps");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,

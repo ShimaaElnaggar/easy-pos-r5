@@ -118,7 +118,17 @@ class _CategoriesViewState extends State<CategoriesView> {
                     onDelete:(CategoryData){
                       onDeleteRow(CategoryData.id!);
                     },
-                  onUpdate:(categoryData){}
+                  onUpdate:(CategoryData)async{
+                    var result = await Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (context) =>  CategoryOperationsView(
+                            categoryData: CategoryData,
+                          )),
+                    );
+                    if (result ?? false) {
+                      getCategories(); // Refresh categories list
+                    }
+                  }
                 ),
               ),
             ),
