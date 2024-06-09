@@ -17,7 +17,7 @@ class Product {
     price = data["price"];
     stock = data["stock"];
     image = data["image"];
-    isAvailable = data["isAvailable"];
+    isAvailable = data["isAvailable"] == 1 ? true : false;
     categoryId = data["categoryId"];
     categoryName = data["categoryName"];
     categoryDesc = data["categoryDesc"];
@@ -31,7 +31,6 @@ class Product {
       "price": price,
       "stock": stock,
       "image": image,
-      "isAvailable": isAvailable,
       "categoryId": categoryId,
     };
   }

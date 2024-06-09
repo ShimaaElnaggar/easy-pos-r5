@@ -34,11 +34,11 @@ class _ProductsOpsState extends State<ProductsOps> {
   void initialData() {
     nameController = TextEditingController(text: widget.product?.name);
     descController = TextEditingController(text: widget.product?.description);
-    descController =
+    priceController =
         TextEditingController(text: '${widget.product?.price ?? ''}');
-    descController =
+    stockController =
         TextEditingController(text: '${widget.product?.stock ?? ''}');
-    descController = TextEditingController(text: widget.product?.image);
+    imageController = TextEditingController(text: widget.product?.image);
     isAvailable = widget.product?.isAvailable ?? false;
     selectedId = widget.product?.categoryId;
     setState(() {});
@@ -198,7 +198,7 @@ class _ProductsOpsState extends State<ProductsOps> {
             'image': imageController?.text,
             'price': priceController?.text,
             'stock': stockController?.text,
-            'isAvailable': isAvailable,
+            'isAvailable': isAvailable ? 1 : 0,
             'categoryId': selectedId,
           });
         } else {
@@ -210,7 +210,7 @@ class _ProductsOpsState extends State<ProductsOps> {
               'image': imageController?.text,
               'price': priceController?.text,
               'stock': stockController?.text,
-              'isAvailable': isAvailable,
+              'isAvailable': isAvailable ? 1 : 0,
               'categoryId': selectedId,
             },
             where: "id=?",
@@ -219,10 +219,12 @@ class _ProductsOpsState extends State<ProductsOps> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: Colors.green,
             content: Text(
-              "Product added Successfully",
+              widget.product == null
+                  ? "Product added Successfully"
+                  : "Product updated Successfully",
             ),
           ),
         );
@@ -237,6 +239,7 @@ class _ProductsOpsState extends State<ProductsOps> {
           ),
         ),
       );
+      print(e);
     }
   }
 }

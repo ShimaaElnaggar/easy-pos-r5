@@ -8,20 +8,22 @@ import 'package:get_it/get_it.dart';
 
 class CategoryOperationsView extends StatefulWidget {
   final CategoryData? categoryData;
-  const CategoryOperationsView({this.categoryData,super.key});
+  const CategoryOperationsView({this.categoryData, super.key});
 
   @override
   State<CategoryOperationsView> createState() => _CategoryOperationsViewState();
 }
+
 class _CategoryOperationsViewState extends State<CategoryOperationsView> {
-  TextEditingController? nameController ;
-  TextEditingController? descController ;
+  TextEditingController? nameController;
+  TextEditingController? descController;
   var formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     nameController = TextEditingController(text: widget.categoryData?.name);
-    descController = TextEditingController(text: widget.categoryData?.description);
+    descController =
+        TextEditingController(text: widget.categoryData?.description);
     super.initState();
   }
 
@@ -30,7 +32,7 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
     return Scaffold(
       backgroundColor: const Color(0xfffafafa),
       appBar: CustomAppbar(
-        title: widget.categoryData == null ? "Add New" : "Update" ,
+        title: widget.categoryData == null ? "Add New" : "Update",
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -45,10 +47,9 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
                 controller: nameController,
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return "Category Name is required";
+                    return "Name is required";
                   }
-                    return null;
-
+                  return null;
                 },
               ),
               const SizedBox(
@@ -63,7 +64,7 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
                   if (value!.isEmpty) {
                     return "Description is required";
                   }
-                    return null;
+                  return null;
                 },
               ),
               const SizedBox(
@@ -86,31 +87,41 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
     try {
       if (formKey.currentState!.validate()) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
-        if(widget.categoryData == null){
-          await sqlHelper.db!.insert('categories', {
-            'name': nameController?.text,
-            'description': descController?.text,
-          });
-        }else{
-          await sqlHelper.db!.update('categories', {
-            'name': nameController?.text,
-            'description': descController?.text,
-          },
+        if (widget.categoryData == null) {
+          // print('Category Name: ${nameController!.text}');
+          // print('Category Description: ${descController!.text}');
+          await sqlHelper.db!.insert(
+            'categories',
+            {
+              'name': nameController!.text,
+              'description': descController!.text,
+            },
+          );
+        } else {
+          await sqlHelper.db!.update(
+            'categories',
+            {
+              'name': nameController?.text,
+              'description': descController?.text,
+            },
             where: "id=?",
             whereArgs: [widget.categoryData?.id],
           );
         }
-        final List<Map<String, dynamic>> maps = await sqlHelper.db!.query('categories');
+        final List<Map<String, dynamic>> maps =
+            await sqlHelper.db!.query('categories');
         print("db data: $maps");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: Colors.green,
             content: Text(
-              "Category added Successfully",
+              widget.categoryData == null
+                  ? "Category added Successfully"
+                  : "Category Updated Successfully",
             ),
           ),
         );
-        Navigator.pop(context,true); //refresh categories page
+        Navigator.pop(context, true); //refresh categories page
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,14 +1,14 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-
 import 'views/home_view.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var sqlHelper = SqlHelper();
   await sqlHelper.init();
-  if(sqlHelper.db != null){
+  print("db: ${sqlHelper.db}");
+  if (sqlHelper.db != null) {
     GetIt.I.registerSingleton(sqlHelper);
   }
   runApp(const MyApp());
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
         colorScheme: ColorScheme.fromSwatch(
-          backgroundColor: Colors.white  ,
+          backgroundColor: Colors.white,
           cardColor: Colors.blue.shade100,
           errorColor: Colors.red,
           primarySwatch: getMaterialColor(
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
       home: const HomeView(),
     );
   }
+
   MaterialColor getMaterialColor(Color color) {
     final int red = color.red;
     final int green = color.green;
@@ -55,4 +56,3 @@ class MyApp extends StatelessWidget {
     return MaterialColor(color.value, shades);
   }
 }
-

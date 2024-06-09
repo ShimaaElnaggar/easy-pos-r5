@@ -24,6 +24,9 @@ class SqlHelper {
   Future<bool> createTables() async {
     try {
       var batch = db!.batch();
+      batch.execute('''
+        PRAGMA foreign_keys = ON
+        ''');
       batch.rawQuery('''
         PRAGMA foreign_keys 
         ''');
@@ -42,7 +45,7 @@ class SqlHelper {
             description TEXT NOT NULL,
             price DOUBlE NOT NULL,
             stock INTEGER NOT NULL,
-            iaAvailable BOOLEAN NOT NULL,
+            isAvailable BOOLEAN NOT NULL,
             image TEXT,
             categoryId INTEGER NOT NULL,
             foreign key (categoryId) references categories (id)
@@ -63,6 +66,10 @@ class SqlHelper {
       print("Tables created Successfully!");
       var result = await batch.commit();
       print("Result: $result");
+      var enableForeignKeyResult = result[0]; // Result of executing 'PRAGMA foreign_keys = ON;'
+      var foreignKeyPragmaResult = result[1]; // Result of executing 'PRAGMA foreign_keys;'
+      print(enableForeignKeyResult); // Result of enabling foreign key support
+      print(foreignKeyPragmaResult);
       return true;
     } catch (error) {
       print("Error in creating tables: $error");

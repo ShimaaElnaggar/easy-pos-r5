@@ -106,15 +106,15 @@ class _CategoriesViewState extends State<CategoriesView> {
                 ],
                 source: CategoriesTableSource(
                     categoriesList: categories,
-                    onDelete: (CategoryData) {
-                      onDeleteRow(CategoryData.id!);
+                    onDelete: (categoryData) {
+                      onDeleteRow(categoryData.id!);
                     },
-                    onUpdate: (CategoryData) async {
+                    onUpdate: (categoryData) async {
                       var result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => CategoryOperationsView(
-                                  categoryData: CategoryData,
+                                  categoryData: categoryData,
                                 )),
                       );
                       if (result ?? false) {

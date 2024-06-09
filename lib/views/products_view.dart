@@ -45,10 +45,11 @@ class _ProductsViewState extends State<ProductsView> {
         SnackBar(
           backgroundColor: Colors.red,
           content: Text(
-            "Error in get category : $e",
+            "Error in get product : $e",
           ),
         ),
       );
+      print("Error in get product : $e");
       products = [];
     }
     setState(() {});
@@ -80,7 +81,7 @@ class _ProductsViewState extends State<ProductsView> {
               onChanged: (value) async {
                 var sqlHelper = GetIt.I.get<SqlHelper>();
                 var result = await sqlHelper.db!.rawQuery("""
-                 SELECT * FROM Categories
+                 SELECT * FROM categories
                  WHERE name LIKE '%$value%' OR description LIKE '%$value%' OR description LIKE '%$value%';
                 """);
                 print('values:$result');
@@ -196,7 +197,11 @@ class ProductsTableSource extends DataTableSource {
       DataCell(Text("${productsList?[index].price}")),
       DataCell(Text("${productsList?[index].stock}")),
       DataCell(Text("${productsList?[index].isAvailable}")),
-      DataCell(Center(child: Image.network("${productsList?[index].image}",fit: BoxFit.contain,))),
+      DataCell(Center(
+          child: Image.network(
+        "${productsList?[index].image}",
+        fit: BoxFit.contain,
+      ))),
       DataCell(Text("${productsList?[index].categoryId}")),
       DataCell(Text("${productsList?[index].categoryName}")),
       DataCell(Text("${productsList?[index].categoryDesc}")),
