@@ -21,15 +21,17 @@ class SqlHelper {
     }
   }
 
+  Future<void> registerForeignKeys() async {
+    await db!.rawQuery("PRAGMA foreign_keys = ON");
+    var result = await db!.rawQuery("PRAGMA foreign_keys");
+
+    print('foreign keys result : $result');
+  }
+
   Future<bool> createTables() async {
     try {
+      await registerForeignKeys();
       var batch = db!.batch();
-      batch.execute('''
-        PRAGMA foreign_keys = ON
-        ''');
-      batch.rawQuery('''
-        PRAGMA foreign_keys 
-        ''');
       batch.execute('''
         CREATE TABLE IF NOT EXISTS categories (
             id INTEGER PRIMARY KEY ,
@@ -66,10 +68,6 @@ class SqlHelper {
       print("Tables created Successfully!");
       var result = await batch.commit();
       print("Result: $result");
-      var enableForeignKeyResult = result[0]; // Result of executing 'PRAGMA foreign_keys = ON;'
-      var foreignKeyPragmaResult = result[1]; // Result of executing 'PRAGMA foreign_keys;'
-      print(enableForeignKeyResult); // Result of enabling foreign key support
-      print(foreignKeyPragmaResult);
       return true;
     } catch (error) {
       print("Error in creating tables: $error");
