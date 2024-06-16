@@ -65,6 +65,28 @@ class SqlHelper {
         )
         ''');
 
+      batch.execute("""
+        CREATE TABLE IF NOT EXISTS orders(
+          id INTEGER PRIMARY KEY,
+          label TEXT,
+          totalPrice REAL,
+          discount REAL,
+          clientId INTEGER NOT NULL,
+          foreign key(clientId) references clients(id)
+          on delete restrict
+          ) 
+          """);
+
+      batch.execute("""
+        CREATE TABLE IF NOT EXISTS orderProductItems(
+         orderId INTEGER,
+         productCount INTEGER,
+         productId INTEGER,
+          foreign key(productId) references products(id)
+          on delete restrict
+          ) 
+          """);
+
       print("Tables created Successfully!");
       var result = await batch.commit();
       print("Result: $result");
