@@ -70,6 +70,7 @@ class SqlHelper {
           id INTEGER PRIMARY KEY,
           label TEXT,
           totalPrice REAL,
+          paidPrice REAL,
           discount REAL,
           clientId INTEGER NOT NULL,
           foreign key(clientId) references clients(id)

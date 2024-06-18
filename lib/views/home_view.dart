@@ -2,6 +2,7 @@ import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/views/categories_view.dart';
 import 'package:easy_pos_r5/views/clients_view.dart';
 import 'package:easy_pos_r5/views/products_view.dart';
+import 'package:easy_pos_r5/views/sales_ops_view.dart';
 import 'package:easy_pos_r5/widgets/card_header_item.dart';
 import 'package:easy_pos_r5/widgets/grid_view_item.dart';
 import 'package:flutter/foundation.dart';
@@ -140,7 +141,11 @@ class _HomeViewState extends State<HomeView> {
                     iconData: Icons.point_of_sale,
                     color: Colors.green,
                     title: "New Sale",
-                    onTab: () {},
+                    onTab: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SalesOpsView(),
+                      ));
+                    },
                   ),
                   GridViewItem(
                     iconData: Icons.category,

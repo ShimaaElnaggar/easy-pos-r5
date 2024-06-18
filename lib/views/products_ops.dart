@@ -49,7 +49,7 @@ class _ProductsOpsState extends State<ProductsOps> {
     return Scaffold(
       backgroundColor: const Color(0xfffafafa),
       appBar: CustomAppbar(
-        title: widget.product == null ? "Add New" : "Update",
+        title: widget.product == null ? "Add New Product" : "Update Product",
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),

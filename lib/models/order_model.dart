@@ -2,6 +2,7 @@ class Order {
   int? id;
   String? label;
   double? totalPrice;
+  double? paidPrice;
   double? discount;
   int? clientId;
   String? clientName;
@@ -12,6 +13,7 @@ class Order {
     id = data["id"];
     label = data["label"];
     totalPrice = data["totalPrice"];
+    paidPrice = data["paidPrice"];
     discount = data["discount"];
     clientId = data["clientId"];
     clientName = data["clientName"];
@@ -24,6 +26,7 @@ class Order {
       "id": id,
       "label": label,
       "totalPrice": totalPrice,
+      "paidPrice": paidPrice,
       "discount": discount,
       "clientId": clientId,
     };

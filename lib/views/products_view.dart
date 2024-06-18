@@ -82,7 +82,7 @@ class _ProductsViewState extends State<ProductsView> {
                 var sqlHelper = GetIt.I.get<SqlHelper>();
                 var result = await sqlHelper.db!.rawQuery("""
                  SELECT * FROM categories
-                 WHERE name LIKE '%$value%' OR description LIKE '%$value%' OR description LIKE '%$value%';
+                 WHERE name LIKE '%$value%' OR description LIKE '%$value%' OR price LIKE '%$value%';
                 """);
                 print('values:$result');
               },

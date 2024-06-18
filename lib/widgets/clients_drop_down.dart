@@ -16,6 +16,11 @@ class ClientsDropDown extends StatefulWidget {
 
 class _ClientsDropDownState extends State<ClientsDropDown> {
   List<ClientData>? clients;
+  @override
+  void initState() {
+    getClients();
+    super.initState();
+  }
   void getClients() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -52,19 +57,20 @@ class _ClientsDropDownState extends State<ClientsDropDown> {
             : Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.black),
+                  border: Border.all(color: Colors.grey),
                 ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
                   child: DropdownButton(
+                    iconSize: 15,
+                    icon: Icon(Icons.arrow_forward_ios_rounded),
                     isExpanded: true,
                     underline: const SizedBox(),
                     value: widget.selectedValue,
                     hint: const Text(
-                      "Select Client ",
+                      " Unnamed client ",
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          TextStyle(fontSize: 16,color:  Colors.black),
                     ),
                     items: [
                       for (var client in clients!)

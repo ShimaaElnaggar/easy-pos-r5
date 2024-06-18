@@ -21,7 +21,8 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
 
   @override
   void initState() {
-    nameController = TextEditingController(text: widget.categoryData?.name);
+    nameController =
+        TextEditingController(text: widget.categoryData?.name);
     descController =
         TextEditingController(text: widget.categoryData?.description);
     super.initState();
@@ -32,7 +33,7 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
     return Scaffold(
       backgroundColor: const Color(0xfffafafa),
       appBar: CustomAppbar(
-        title: widget.categoryData == null ? "Add New" : "Update",
+        title: widget.categoryData == null ? "Add New Category" : "Update Category",
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -88,8 +89,6 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
       if (formKey.currentState!.validate()) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
         if (widget.categoryData == null) {
-          // print('Category Name: ${nameController!.text}');
-          // print('Category Description: ${descController!.text}');
           await sqlHelper.db!.insert(
             'categories',
             {
@@ -108,9 +107,7 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
             whereArgs: [widget.categoryData?.id],
           );
         }
-        final List<Map<String, dynamic>> maps =
-            await sqlHelper.db!.query('categories');
-        print("db data: $maps");
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.green,
