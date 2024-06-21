@@ -74,26 +74,7 @@ class _ClientsViewState extends State<ClientsView> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            CustomTextFormField(
-              onChanged: (value) async {
-                var sqlHelper = GetIt.I.get<SqlHelper>();
-                var result = await sqlHelper.db!.rawQuery("""
-                 SELECT * FROM clients
-                 WHERE name LIKE '%$value%';
-                """);
-
-                print('values:$result');
-              },
-              textInputAction: TextInputAction.done,
-              keyboardType: TextInputType.text,
-              prefixIcon: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.search,
-                    color: Theme.of(context).primaryColor,
-                  )),
-              label: "Search",
-            ),
+            search(context),
             const SizedBox(
               height: 20,
             ),
@@ -130,6 +111,37 @@ class _ClientsViewState extends State<ClientsView> {
       ),
     );
   }
+
+  CustomTextFormField search(BuildContext context) {
+    return CustomTextFormField(
+            onChanged: (value) async {
+              await filterClients(value);
+            },
+            textInputAction: TextInputAction.done,
+            keyboardType: TextInputType.text,
+            prefixIcon: IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).primaryColor,
+                )),
+            label: "Search",
+          );
+  }
+
+  Future<void> filterClients(String query) async {
+    var sqlHelper = GetIt.I.get<SqlHelper>();
+    var result = await sqlHelper.db!.rawQuery("""
+               SELECT * FROM clients
+               WHERE name LIKE '%$query%';
+              """);
+    setState(() {
+      clients = result.map((map) => ClientData(
+          name: map['name']as String,
+      )).toList();
+    });
+  }
+
   Future<void> onDeleteRow(int id) async {
     try {
       var dialogueResult = await showDialog(

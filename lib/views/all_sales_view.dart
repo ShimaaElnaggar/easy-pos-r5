@@ -94,16 +94,19 @@ class _AllSalesState extends State<AllSales> {
           child: const Text('Show Product Sold'),
         ),
       ),
-      body: (orders?.isEmpty ?? true)
-          ? const Center(
-              child: Text("No data found"),
-            )
-          : Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Column(
-                children: [
-                  search(),
-                  Expanded(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          children: [
+            search(),
+            (orders?.isEmpty ?? true)
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(200.0),
+                      child: Text("No data found"),
+                    ),
+                  )
+                : Expanded(
                     child: ListView.builder(
                       itemCount: orders?.length ?? 0,
                       itemBuilder: (context, index) {
@@ -293,9 +296,9 @@ class _AllSalesState extends State<AllSales> {
                       },
                     ),
                   ),
-                ],
-              ),
-            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -339,53 +342,82 @@ class _AllSalesState extends State<AllSales> {
         horizontal: 20,
       ),
       child: CustomTextFormField(
+        prefixIcon: IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.search,
+              color: Theme.of(context).primaryColor,
+            )),
         onChanged: (value) async {
-          var sqlHelper = GetIt.I.get<SqlHelper>();
-          await sqlHelper.db!.rawQuery("""
-              SELECT * FROM orders
-              WHERE label LIKE '%$value%';
-                 """);
+          await filterOrders(value);
         },
         label: 'Search',
       ),
     );
   }
 
+  Future<void> filterOrders(String query) async {
+    var sqlHelper = GetIt.I.get<SqlHelper>();
+    final List<Map<String, dynamic>> maps = await sqlHelper.db!.rawQuery("""
+    SELECT * FROM orders
+    WHERE label LIKE '%$query%';
+  """);
+
+    setState(() {
+      orders = maps.map((map) => Order(label: map['label'])).toList();
+    });
+  }
+
   Future<void> onDeleteRow(int id) async {
     try {
-      var dialogueResult = await showDialog(
+      var dialogResult = await showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text("Delete Item"),
-              content: const Text("Are you sure you want to delete this Item?"),
+              title: const Text('Delete Order'),
+              content:
+                  const Text('Are you sure you want to delete this order?'),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: const Text("Cancel"),
+                  child: const Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, true);
                   },
-                  child: const Text("Delete"),
+                  child: const Text('Delete'),
                 ),
               ],
             );
           });
-      if (dialogueResult ?? false) {
+
+      if (dialogResult ?? false) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
-        var result = await sqlHelper.db!
-            .delete('orders', where: 'id =?', whereArgs: [id]);
+        var result = await sqlHelper.db!.delete(
+          'orders',
+          where: 'id =?',
+          whereArgs: [id],
+        );
         if (result > 0) {
           getOrders();
-          print("Row deleted Successfully!");
         }
       }
+      // if (dialogResult ?? false) {
+      //   var sqlHelper = GetIt.I.get<SqlHelper>();
+      //   var result = await sqlHelper.db!.delete(
+      //     'orderProductItems',
+      //     where: 'id =?',
+      //     whereArgs: [id],
+      //   );
+      //   if (result > 0) {
+      //     getProductItems();
+      //   }
+      // }
     } catch (e) {
-      print("Error in deleting row : $e");
+      print('Error In delete data $e');
     }
   }
 }

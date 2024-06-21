@@ -73,26 +73,7 @@ class _CategoriesViewState extends State<CategoriesView> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            CustomTextFormField(
-              onChanged: (value) async {
-                var sqlHelper = GetIt.I.get<SqlHelper>();
-                var result = await sqlHelper.db!.rawQuery("""
-                 SELECT * FROM Categories
-                 WHERE name LIKE '%$value%' OR description LIKE '%$value%';
-                """);
-
-                print('values:$result');
-              },
-              textInputAction: TextInputAction.done,
-              keyboardType: TextInputType.text,
-              prefixIcon: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.search,
-                    color: Theme.of(context).primaryColor,
-                  )),
-              label: "Search",
-            ),
+            search(context),
             const SizedBox(
               height: 20,
             ),
@@ -127,6 +108,37 @@ class _CategoriesViewState extends State<CategoriesView> {
         ),
       ),
     );
+  }
+
+  CustomTextFormField search(BuildContext context) {
+    return CustomTextFormField(
+            onChanged: (value) async {
+              await filterCategories(value);
+            },
+            textInputAction: TextInputAction.done,
+            keyboardType: TextInputType.text,
+            prefixIcon: IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).primaryColor,
+                )),
+            label: "Search",
+          );
+  }
+
+  Future<void> filterCategories(String query) async {
+    var sqlHelper = GetIt.I.get<SqlHelper>();
+    var result = await sqlHelper.db!.rawQuery("""
+    SELECT * FROM Categories
+    WHERE name LIKE '%$query%' OR description LIKE '%$query%';
+  """);
+    setState(() {
+      categories = result.map((map) => CategoryData(
+          name: map['name']as String,
+          description: map["description"] as String
+      )).toList();
+    });
   }
 
   Future<void> onDeleteRow(int id) async {

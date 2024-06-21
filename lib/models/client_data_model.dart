@@ -12,6 +12,8 @@ class ClientData{
 
   }
 
+  ClientData({required this.name});
+
   Map<String,dynamic> toJson(){
     return{
       "id" : id,

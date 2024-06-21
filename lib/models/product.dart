@@ -10,6 +10,8 @@ class Product {
   String? categoryName;
   String? categoryDesc;
 
+  Product({required this.name,required this.description,required this.price});
+
   Product.fromJson(Map<String, dynamic> data) {
     id = data["id"];
     name = data["name"];

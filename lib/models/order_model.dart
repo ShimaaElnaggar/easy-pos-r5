@@ -9,6 +9,9 @@ class Order {
   String? clientPhone;
   String? clientAddress;
 
+  Order({required this.label});
+
+
   Order.fromJson(Map<String, dynamic> data) {
     id = data["id"];
     label = data["label"];

@@ -77,25 +77,7 @@ class _ProductsViewState extends State<ProductsView> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            CustomTextFormField(
-              onChanged: (value) async {
-                var sqlHelper = GetIt.I.get<SqlHelper>();
-                var result = await sqlHelper.db!.rawQuery("""
-                 SELECT * FROM categories
-                 WHERE name LIKE '%$value%' OR description LIKE '%$value%' OR price LIKE '%$value%';
-                """);
-                print('values:$result');
-              },
-              textInputAction: TextInputAction.done,
-              keyboardType: TextInputType.text,
-              prefixIcon: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.search,
-                    color: Theme.of(context).primaryColor,
-                  )),
-              label: "Search",
-            ),
+            search(context),
             const SizedBox(
               height: 20,
             ),
@@ -138,6 +120,37 @@ class _ProductsViewState extends State<ProductsView> {
         ),
       ),
     );
+  }
+
+  CustomTextFormField search(BuildContext context) {
+    return CustomTextFormField(
+            onChanged: (value) async {
+              await filterProducts(value);
+            },
+            textInputAction: TextInputAction.done,
+            prefixIcon: IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).primaryColor,
+                )),
+            label: "Search",
+          );
+  }
+
+  Future<void> filterProducts(String query) async {
+    var sqlHelper = GetIt.I.get<SqlHelper>();
+    var result = await sqlHelper.db!.rawQuery("""
+               SELECT * FROM products
+               WHERE name LIKE '%$query%' OR description LIKE '%$query%' OR price LIKE '%$query%';
+              """);
+    setState(() {
+      products = result.map((map) => Product(
+           name: map['name'] as String,
+          description : map["description"] as String,
+          price : map["price"] as double
+      )).toList();
+    });
   }
 
   Future<void> onDeleteRow(int id) async {
