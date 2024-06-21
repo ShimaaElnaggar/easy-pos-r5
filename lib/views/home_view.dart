@@ -1,4 +1,5 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
+import 'package:easy_pos_r5/views/all_sales_view.dart';
 import 'package:easy_pos_r5/views/categories_view.dart';
 import 'package:easy_pos_r5/views/clients_view.dart';
 import 'package:easy_pos_r5/views/products_view.dart';
@@ -114,7 +115,11 @@ class _HomeViewState extends State<HomeView> {
                     iconData: Icons.calculate,
                     color: Colors.orange,
                     title: "All Sales",
-                    onTab: () {},
+                    onTab: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const AllSales(),
+                      ));
+                    },
                   ),
                   GridViewItem(
                     iconData: Icons.inventory_2,

@@ -20,11 +20,11 @@ class SalesOpsView extends StatefulWidget {
 class _SalesOpsViewState extends State<SalesOpsView> {
   String? orderLabel;
   int? selectedID;
-  double paidPrice = 0.0;
+  double paidPrice =0;
   List<Product>? products;
   List<OrderItem> selectedOrderItem = [];
   GlobalKey formKey = GlobalKey<FormState>();
-  TextEditingController? discountController ;
+  TextEditingController? discountController;
   @override
   void initState() {
     initView();
@@ -37,7 +37,8 @@ class _SalesOpsViewState extends State<SalesOpsView> {
         ? '#OR${DateTime.now().millisecondsSinceEpoch}'
         : widget.order?.id.toString();
     selectedID = widget.order?.clientId;
-    discountController = TextEditingController(text: '${widget.order?.discount ?? ''}' );
+    discountController =
+        TextEditingController(text: '${widget.order?.discount ?? ''}');
 
   }
 
@@ -99,123 +100,149 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(
-                              height: 16,
-                            ),
-                            Text(
-                              'Label : $orderLabel',
-                              style: const TextStyle(
-                                fontSize: 16,
+                        child: IntrinsicWidth(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 16,
                               ),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            for (var orderItem in selectedOrderItem)
-                              ListTile(
-                                leading:
-                                Image.network(orderItem.product?.image ?? ''),
-                                title: Text(
-                                    '${orderItem.product?.name ?? ''}'),
-                                trailing: Container(
-                                  padding: const EdgeInsets.all(5),
-                                  height: 25,
-                                  width: 25,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    color:  const Color(0xfffafafa),
-                                      border: Border.all(
-                                        color: Colors.grey,
-                                      )
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '${orderItem.productCount}X',
-                                      style: TextStyle(fontWeight:FontWeight.w700,color: Theme.of(context).primaryColor),),
-                                  ),
+                              Text(
+                                'Label : $orderLabel',
+                                style: const TextStyle(
+                                  fontSize: 16,
                                 ),
                               ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            CustomElevatedButton(
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              for (var orderItem in selectedOrderItem)
+                                ListTile(
+                                  leading: Image.network(
+                                      orderItem.product?.image ?? ''),
+                                  title: Text(orderItem.product?.name ?? ''),
+                                  trailing: Container(
+                                    height: 25,
+                                    width: 25,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: const Color(0xfffafafa),
+                                        border: Border.all(
+                                          color: Colors.grey,
+                                        )),
+                                    child: Center(
+                                      child: Text(
+                                        '${orderItem.productCount}X',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              CustomElevatedButton(
                                 onPressed: () {
                                   onAddProduct();
                                 },
                                 title: 'Add Products',
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Total Price : ',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                Text(
-                                  '$calculateTotalPrice',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            CustomTextFormField(
-                              label: 'Add discount',
-                              controller: discountController,
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.done,
-                              onChanged: (value) {
-                                setState(() {
-                                  double discount = double.tryParse(value) ?? 0;
-                                  paidPrice = calculateTotalPrice - (calculateTotalPrice* discount /100);
-                                });
-                              },
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              height: 50,
-                              width: double.maxFinite,
-                              decoration: BoxDecoration(
-                                color: const Color(0xfff1f5ff),
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: Theme.of(context).primaryColor,width: 2),
                               ),
-                                child: Text('Paid Price : $paidPrice',
-                                  style: TextStyle(color: Theme.of(context).primaryColor),),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                          ],
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Divider(
+                                  color: Colors.grey,
+                                  thickness: 1,
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Total Price : ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    '$calculateTotalPrice',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Divider(
+                                  color: Colors.grey,
+                                  thickness: 1,
+                                ),
+                              ),
+
+                              const SizedBox(
+                                height: 20,
+                              ),
+                               CustomTextFormField(
+                                label: 'Add discount',
+                                controller: discountController,
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.done,
+                                onChanged: (value) {
+                                  setState(() {
+                                    double discount = double.tryParse(value) ?? 0;
+                                    paidPrice = calculateTotalPrice -
+                                        (calculateTotalPrice * discount / 100) ;
+                                  });
+                                },
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                height: 50,
+                                width: double.maxFinite,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xfff1f5ff),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                      color: Theme.of(context).primaryColor,
+                                      width: 2),
+                                ),
+                                child: Text(
+                                  'Paid Price : ${widget.order?.discount == 0 ? calculateTotalPrice :paidPrice}',
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                ],
+                  ],
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               CustomElevatedButton(
-                  onPressed: selectedOrderItem.isEmpty
-                      ? null
-                      : () async {
-                    await onSetOrder();
-                  },
+                onPressed: selectedOrderItem.isEmpty
+                    ? null
+                    : () async {
+                        await onSetOrder();
+                      },
                 title: 'Add Order',
               ),
             ],
@@ -233,7 +260,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
           builder: (context, dialogueSetState) {
             return Dialog(
               child: Padding(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 15),
                 child: (products?.isEmpty ?? false)
                     ? const Center(
                         child: Text("No data found"),
@@ -358,14 +385,15 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                             ),
                                     ),
                                   ),
-                                CustomElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  title: 'Back',
-                                ),
+
                               ],
                             ),
+                          ),
+                          CustomElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            title: 'Back',
                           ),
                         ],
                       ),
@@ -412,7 +440,13 @@ class _SalesOpsViewState extends State<SalesOpsView> {
     return total;
   }
 
-
+  double calculatePaidPrice(Order order) {
+    if (order.discount != 0.0) {
+      return order.totalPrice??0 - (order.totalPrice??0 * order.discount! /100);
+    } else {
+      return order.totalPrice??0;
+    }
+  }
   Future<void> onSetOrder() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -421,7 +455,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
         'label': orderLabel,
         'totalPrice': calculateTotalPrice,
         'discount': discount,
-        'paidPrice':paidPrice,
+        'paidPrice': paidPrice,
         'clientId': selectedID,
       });
 

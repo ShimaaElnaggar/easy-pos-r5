@@ -11,6 +11,7 @@ class CustomTextFormField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
+  final void Function(String?)? onSaved;
 
   const CustomTextFormField({
     this.suffixIcon,
@@ -21,6 +22,7 @@ class CustomTextFormField extends StatelessWidget {
     this.textInputAction,
     this.keyboardType,
     this.inputFormatters,
+    this.onSaved,
     required this.label,
     super.key,
   });
@@ -31,6 +33,7 @@ class CustomTextFormField extends StatelessWidget {
       controller: controller,
       inputFormatters: inputFormatters,
       onChanged: onChanged,
+      onSaved: onSaved,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       keyboardType: keyboardType,
       textInputAction: textInputAction,

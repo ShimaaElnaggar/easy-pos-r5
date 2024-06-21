@@ -83,6 +83,7 @@ class SqlHelper {
          orderId INTEGER,
          productCount INTEGER,
          productId INTEGER,
+         isPaid Real,
           foreign key(productId) references products(id)
           on delete restrict
           ) 
