@@ -1,4 +1,5 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
+import 'package:easy_pos_r5/models/exchange_rate_model.dart';
 import 'package:easy_pos_r5/views/all_sales_view.dart';
 import 'package:easy_pos_r5/views/categories_view.dart';
 import 'package:easy_pos_r5/views/clients_view.dart';
@@ -11,7 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  final ExchangeRate? exchangeRate;
+  const HomeView({this.exchangeRate, super.key});
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -20,6 +22,8 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   bool isLoading = true;
   bool isTableInitialized = false;
+  List<ExchangeRate>? exchangeRates;
+
   @override
   void initState() {
     initTables();
@@ -30,13 +34,48 @@ class _HomeViewState extends State<HomeView> {
     var sqlHelper = GetIt.I.get<SqlHelper>();
     isTableInitialized = await sqlHelper.createTables();
     isLoading = false;
+    setState(() {
+    });
+
+    await insertRate();
+    getExchangeRate();
+  }
+
+  void getExchangeRate() async {
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var data = await sqlHelper.db!.query('exchangeRate');
+
+      if (data.isNotEmpty) {
+        exchangeRates = [];
+        for (var rate in data) {
+          exchangeRates!.add(ExchangeRate.fromJson(rate));
+        }
+      } else {
+        exchangeRates = [];
+      }
+    } catch (e) {
+      print("Error in get Exchange Rates : $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            "Error in get Exchange Rates : $e",
+          ),
+        ),
+      );
+      exchangeRates = [];
+    }
     setState(() {});
+  }
+
+  double calculateTodaySales() {
+    return 1000.0;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       backgroundColor: const Color(0xfffafafa),
       drawer: const Drawer(),
       appBar: AppBar(),
@@ -88,13 +127,29 @@ class _HomeViewState extends State<HomeView> {
                         const SizedBox(
                           height: 12,
                         ),
-                        const CardHeaderItem(
-                          title: "Exchange rate",
-                          subTitle: "1 USD = 50 Egp",
-                        ),
-                        const CardHeaderItem(
+                        if (exchangeRates != null && exchangeRates!.isNotEmpty)
+                          CardHeaderItem(
+                            title: "Exchange Rate",
+                            subTitle: '1'
+                                ' '
+                                '${exchangeRates![0].currencyFrom.toString()}'
+                                ' '
+                                '='
+                                ' '
+                                ' ${exchangeRates![0].rate.toString()}'
+                                ' '
+                                '${exchangeRates![0].currencyTo.toString()}',
+                          ),
+                        if (exchangeRates == null || exchangeRates!.isEmpty)
+                          const SizedBox(
+                            height: 24,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        CardHeaderItem(
                           title: "Today's sales",
-                          subTitle: "1000 EGP",
+                          subTitle: calculateTodaySales().toString(),
                         ),
                       ],
                     ),
@@ -169,5 +224,34 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
     );
+  }
+
+  Future<void> insertRate() async {
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      await sqlHelper.db!.insert(
+          'exchangeRate', {
+        'currencyFrom': 'USD',
+        'currencyTo': 'EGP',
+        'rate': 47.71,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text("exchangeRate added Successfully"),
+        ),
+      );
+    } catch (e) {
+      print("Error in creating ExchangeRate : $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            "Error in creating ExchangeRate : $e",
+          ),
+        ),
+      );
+    }
   }
 }

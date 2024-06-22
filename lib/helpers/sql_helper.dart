@@ -89,6 +89,15 @@ class SqlHelper {
           ) 
           """);
 
+      batch.execute('''
+      CREATE TABLE IF NOT EXISTS exchangeRate (
+          id INTEGER PRIMARY KEY,
+          currencyFrom TEXT,
+          currencyTo TEXT,
+          rate REAL 
+      )
+    ''');
+
       print("Tables created Successfully!");
       var result = await batch.commit();
       print("Result: $result");
