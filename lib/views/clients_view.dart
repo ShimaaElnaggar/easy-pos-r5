@@ -1,4 +1,3 @@
-
 import 'package:data_table_2/data_table_2.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/client_data_model.dart';
@@ -18,6 +17,8 @@ class ClientsView extends StatefulWidget {
 
 class _ClientsViewState extends State<ClientsView> {
   List<ClientData>? clients;
+  int sortColumnIndex = 0;
+  bool sortValue = true;
   void initState() {
     getClients();
     super.initState();
@@ -49,16 +50,32 @@ class _ClientsViewState extends State<ClientsView> {
     }
     setState(() {});
   }
+
+  void sort(Comparable? Function(ClientData client) getField, int columnIndex,
+      bool ascending) {
+    clients?.sort((a, b) {
+      final aValue = getField(a);
+      final bValue = getField(b);
+      return ascending
+          ? Comparable.compare(aValue!, bValue!)
+          : Comparable.compare(bValue!, aValue!);
+    });
+    setState(() {
+      sortColumnIndex = columnIndex;
+      sortValue = ascending;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xfffafafa),
+      backgroundColor: const Color(0xfffafafa),
       appBar: CustomAppbar(
         title: 'Clients',
         actions: [
           IconButton(
-            onPressed: () async{
-             var result = await Navigator.push(
+            onPressed: () async {
+              var result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const ClientsOperations()));
@@ -66,7 +83,7 @@ class _ClientsViewState extends State<ClientsView> {
                 getClients(); // Refresh categories list
               }
             },
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
           )
         ],
       ),
@@ -80,25 +97,47 @@ class _ClientsViewState extends State<ClientsView> {
             ),
             Expanded(
               child: CustomDataTable(
-                  columns:const [
-                    DataColumn(label: Text("Id")),
-                    DataColumn(label: Text("Name")),
-                    DataColumn(label: Text("phone")),
-                    DataColumn(label: Text("Address")),
-                    DataColumn(label: Center(child: Text("Actions"))),
-                  ],
+                sortColumnIndex: sortColumnIndex,
+                sortAscending: sortValue,
+                columns: [
+                  DataColumn(
+                    label: const Center(child: Text("Id")),
+                    onSort: (columnIndex, ascending) {
+                      sort((client) => client.id!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Name")),
+                    onSort: (columnIndex, ascending) {
+                      sort((client) => client.name!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("phone")),
+                    onSort: (columnIndex, ascending) {
+                      sort((client) => client.phone!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Address")),
+                    onSort: (columnIndex, ascending) {
+                      sort((client) => client.address!, columnIndex, ascending);
+                    },
+                  ),
+                  const DataColumn(label: Center(child: Text("Actions"))),
+                ],
                 source: ClientsTableSource(
                     clientsList: clients,
-                    onDelete: (categoryData) {
-                      onDeleteRow(categoryData.id!);
+                    onDelete: (clientData) {
+                      onDeleteRow(clientData.id!);
                     },
                     onUpdate: (clientData) async {
                       var result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ClientsOperations(
-                              clientData: clientData,
-                            )),
+                                  clientData: clientData,
+                                )),
                       );
                       if (result ?? false) {
                         getClients(); // Refresh categories list
@@ -114,19 +153,19 @@ class _ClientsViewState extends State<ClientsView> {
 
   CustomTextFormField search(BuildContext context) {
     return CustomTextFormField(
-            onChanged: (value) async {
-              await filterClients(value);
-            },
-            textInputAction: TextInputAction.done,
-            keyboardType: TextInputType.text,
-            prefixIcon: IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.search,
-                  color: Theme.of(context).primaryColor,
-                )),
-            label: "Search",
-          );
+      onChanged: (value) async {
+        await filterClients(value);
+      },
+      textInputAction: TextInputAction.done,
+      keyboardType: TextInputType.text,
+      prefixIcon: IconButton(
+          onPressed: () {},
+          icon: Icon(
+            Icons.search,
+            color: Theme.of(context).primaryColor,
+          )),
+      label: "Search",
+    );
   }
 
   Future<void> filterClients(String query) async {
@@ -136,9 +175,11 @@ class _ClientsViewState extends State<ClientsView> {
                WHERE name LIKE '%$query%';
               """);
     setState(() {
-      clients = result.map((map) => ClientData(
-          name: map['name']as String,
-      )).toList();
+      clients = result
+          .map((map) => ClientData(
+                name: map['name'] as String,
+              ))
+          .toList();
     });
   }
 
@@ -150,7 +191,7 @@ class _ClientsViewState extends State<ClientsView> {
             return AlertDialog(
               title: const Text("Delete Client"),
               content:
-              const Text("Are you sure you want to delete this client?"),
+                  const Text("Are you sure you want to delete this client?"),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -188,37 +229,39 @@ class ClientsTableSource extends DataTableSource {
   void Function(ClientData) onUpdate;
   ClientsTableSource(
       {required this.clientsList,
-        required this.onDelete,
-        required this.onUpdate});
+      required this.onDelete,
+      required this.onUpdate});
   @override
   DataRow? getRow(int index) {
-    return DataRow2(
-        cells: [
-          DataCell(Text("${clientsList?[index].id}")),
-          DataCell(Text("${clientsList?[index].name}")),
-          DataCell(Text("${clientsList?[index].phone}")),
-          DataCell(Text("${clientsList?[index].address}")),
-          DataCell(
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                    onPressed: () {
-                      onUpdate(clientsList![index]);
-                    },
-                    icon: const Icon(Icons.edit)),
-                IconButton(
-                    onPressed: () async {
-                      onDelete(clientsList![index]);
-                    },
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    )),
-              ],
-            ),
-          ),
-        ]);
+    return DataRow2(cells: [
+      DataCell(Center(child: Text("${clientsList?[index].id}"))),
+      DataCell(Center(child: Text("${clientsList?[index].name}"))),
+      DataCell(Center(child: Text("${clientsList?[index].phone}"))),
+      DataCell(Center(child: Text("${clientsList?[index].address}"))),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+                onPressed: () {
+                  onUpdate(clientsList![index]);
+                },
+                icon: const Icon(
+                  Icons.edit,
+                  color: Color(0xff0157DB),
+                )),
+            IconButton(
+                onPressed: () async {
+                  onDelete(clientsList![index]);
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                )),
+          ],
+        ),
+      ),
+    ]);
   }
 
   @override

@@ -16,7 +16,11 @@ class ProductsView extends StatefulWidget {
 }
 
 class _ProductsViewState extends State<ProductsView> {
-  List<Product>? products; // null == loading
+  List<Product>? products;
+  double minPrice = 0.0;
+  double maxPrice = double.infinity;
+  bool sortValue = true;
+  int sortColumnIndex = 0;
   @override
   void initState() {
     getProducts();
@@ -55,6 +59,21 @@ class _ProductsViewState extends State<ProductsView> {
     setState(() {});
   }
 
+  void sort(Comparable? Function(Product product) getField, int columnIndex,
+      bool ascending) {
+    products?.sort((a, b) {
+      final aValue = getField(a);
+      final bValue = getField(b);
+      return ascending
+          ? Comparable.compare(aValue!, bValue!)
+          : Comparable.compare(bValue!, aValue!);
+    });
+    setState(() {
+      sortColumnIndex = columnIndex;
+      sortValue = ascending;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,19 +102,71 @@ class _ProductsViewState extends State<ProductsView> {
             ),
             Expanded(
               child: CustomDataTable(
+                sortColumnIndex: sortColumnIndex,
+                sortAscending: sortValue,
                 minWidth: 1500,
-                columns: const [
-                  DataColumn(label: Text("Id")),
-                  DataColumn(label: Text("Name")),
-                  DataColumn(label: Text("Description")),
-                  DataColumn(label: Text("Price")),
-                  DataColumn(label: Text("Stock")),
-                  DataColumn(label: Text("Is Available")),
-                  DataColumn(label: Center(child: Text("Image"))),
-                  DataColumn(label: Text("Category Id")),
-                  DataColumn(label: Text("Category Name")),
-                  DataColumn(label: Text("Category Description")),
-                  DataColumn(label: Center(child: Text("Actions"))),
+                columns: [
+                  DataColumn(
+                    label: const Center(child: Text("Id")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.id!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Name")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.name!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Description")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.description!, columnIndex,
+                          ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Price")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.price!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Stock")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.stock!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Is Available")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.isAvailable! ? 1 : 0,
+                          columnIndex, ascending);
+                    },
+                  ),
+                  const DataColumn(label: Center(child: Text("Image"))),
+                  DataColumn(
+                    label: const Center(child: Text("Category Id")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.categoryId!, columnIndex,
+                          ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Category Name")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.categoryName!, columnIndex,
+                          ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Category Description")),
+                    onSort: (columnIndex, ascending) {
+                      sort((product) => product.categoryDesc!, columnIndex,
+                          ascending);
+                    },
+                  ),
+                  const DataColumn(label: Center(child: Text("Actions"))),
                 ],
                 source: ProductsTableSource(
                     productsList: products,
@@ -122,8 +193,11 @@ class _ProductsViewState extends State<ProductsView> {
     );
   }
 
-  CustomTextFormField search(BuildContext context) {
-    return CustomTextFormField(
+  search(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: CustomTextFormField(
             onChanged: (value) async {
               await filterProducts(value);
             },
@@ -135,21 +209,54 @@ class _ProductsViewState extends State<ProductsView> {
                   color: Theme.of(context).primaryColor,
                 )),
             label: "Search",
-          );
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 90,
+          child: CustomTextFormField(
+            label: 'Min Price',
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              setState(() {
+                minPrice = double.tryParse(value) ?? 0.0;
+              });
+              filterProducts('');
+            },
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 90,
+          child: CustomTextFormField(
+            label: 'Max Price',
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              setState(() {
+                maxPrice = double.tryParse(value) ?? double.infinity;
+              });
+              filterProducts('');
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> filterProducts(String query) async {
     var sqlHelper = GetIt.I.get<SqlHelper>();
     var result = await sqlHelper.db!.rawQuery("""
                SELECT * FROM products
-               WHERE name LIKE '%$query%' OR description LIKE '%$query%' OR price LIKE '%$query%';
+               WHERE (name LIKE '%$query%' OR description LIKE '%$query%' OR price LIKE '%$query%')
+               AND price >= $minPrice AND price <= $maxPrice;
               """);
     setState(() {
-      products = result.map((map) => Product(
-           name: map['name'] as String,
-          description : map["description"] as String,
-          price : map["price"] as double
-      )).toList();
+      products = result
+          .map((map) => Product(
+              name: map['name'] as String,
+              description: map["description"] as String,
+              price: map["price"] as double))
+          .toList();
     });
   }
 
@@ -204,20 +311,20 @@ class ProductsTableSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     return DataRow2(cells: [
-      DataCell(Text("${productsList?[index].id}")),
-      DataCell(Text("${productsList?[index].name}")),
-      DataCell(Text("${productsList?[index].description}")),
-      DataCell(Text("${productsList?[index].price}")),
-      DataCell(Text("${productsList?[index].stock}")),
-      DataCell(Text("${productsList?[index].isAvailable}")),
+      DataCell(Center(child: Text("${productsList?[index].id}"))),
+      DataCell(Center(child: Text("${productsList?[index].name}"))),
+      DataCell(Center(child: Text("${productsList?[index].description}"))),
+      DataCell(Center(child: Text("${productsList?[index].price}"))),
+      DataCell(Center(child: Text("${productsList?[index].stock}"))),
+      DataCell(Center(child: Text("${productsList?[index].isAvailable}"))),
       DataCell(Center(
           child: Image.network(
         "${productsList?[index].image}",
         fit: BoxFit.contain,
       ))),
-      DataCell(Text("${productsList?[index].categoryId}")),
-      DataCell(Text("${productsList?[index].categoryName}")),
-      DataCell(Text("${productsList?[index].categoryDesc}")),
+      DataCell(Center(child: Text("${productsList?[index].categoryId}"))),
+      DataCell(Center(child: Text("${productsList?[index].categoryName}"))),
+      DataCell(Center(child: Text("${productsList?[index].categoryDesc}"))),
       DataCell(
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -226,7 +333,10 @@ class ProductsTableSource extends DataTableSource {
                 onPressed: () {
                   onUpdate(productsList![index]);
                 },
-                icon: const Icon(Icons.edit)),
+                icon: const Icon(
+                  Icons.edit,
+                  color: Color(0xff0157DB),
+                )),
             IconButton(
                 onPressed: () async {
                   onDelete(productsList![index]);

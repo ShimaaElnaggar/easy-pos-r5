@@ -21,6 +21,8 @@ class _AllSalesState extends State<AllSales> {
   String formattedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
   String formattedTime = DateFormat('h:mm a').format(DateTime.now());
   bool? isPaid = true;
+  double minPrice = 0.0;
+  double maxPrice = double.infinity;
   @override
   void initState() {
     getOrders();
@@ -341,17 +343,51 @@ class _AllSalesState extends State<AllSales> {
       padding: const EdgeInsets.symmetric(
         horizontal: 20,
       ),
-      child: CustomTextFormField(
-        prefixIcon: IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.search,
-              color: Theme.of(context).primaryColor,
-            )),
-        onChanged: (value) async {
-          await filterOrders(value);
-        },
-        label: 'Search',
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomTextFormField(
+              prefixIcon: IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.search,
+                    color: Theme.of(context).primaryColor,
+                  )),
+              onChanged: (value) async {
+                await filterOrders(value);
+              },
+              label: 'Search',
+            ),
+          ),
+          SizedBox(width: 10),
+          Container(
+            width: 80,
+            child: CustomTextFormField(
+              label: 'Min Price',
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                setState(() {
+                  minPrice = double.tryParse(value) ?? 0.0;
+                });
+                filterOrders('');
+              },
+            ),
+          ),
+          SizedBox(width: 10),
+          Container(
+            width: 80,
+            child: CustomTextFormField(
+              label: 'Max Price',
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                setState(() {
+                  maxPrice = double.tryParse(value) ?? double.infinity;
+                });
+                filterOrders('');
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -360,11 +396,14 @@ class _AllSalesState extends State<AllSales> {
     var sqlHelper = GetIt.I.get<SqlHelper>();
     final List<Map<String, dynamic>> maps = await sqlHelper.db!.rawQuery("""
     SELECT * FROM orders
-    WHERE label LIKE '%$query%';
+    WHERE (label LIKE '%$query%' OR paidPrice LIKE '%$query%')
+    AND price >= $minPrice AND price <= $maxPrice;
   """);
 
     setState(() {
-      orders = maps.map((map) => Order(label: map['label'])).toList();
+      orders = maps
+          .map((map) => Order(label: map['label'], paidPrice: map['paidPrice']))
+          .toList();
     });
   }
 

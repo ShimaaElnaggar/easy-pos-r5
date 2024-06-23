@@ -17,6 +17,8 @@ class CategoriesView extends StatefulWidget {
 
 class _CategoriesViewState extends State<CategoriesView> {
   List<CategoryData>? categories; // null == loading
+  bool sortValue = true;
+  int sortColumnIndex = 0;
   @override
   void initState() {
     getCategories();
@@ -50,6 +52,21 @@ class _CategoriesViewState extends State<CategoriesView> {
     setState(() {});
   }
 
+  void sort(Comparable? Function(CategoryData category) getField,
+      int columnIndex, bool ascending) {
+    categories?.sort((a, b) {
+      final aValue = getField(a);
+      final bValue = getField(b);
+      return ascending
+          ? Comparable.compare(aValue!, bValue!)
+          : Comparable.compare(bValue!, aValue!);
+    });
+    setState(() {
+      sortColumnIndex = columnIndex;
+      sortValue = ascending;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,11 +96,30 @@ class _CategoriesViewState extends State<CategoriesView> {
             ),
             Expanded(
               child: CustomDataTable(
-                columns: const [
-                  DataColumn(label: Text("Id")),
-                  DataColumn(label: Text("Name")),
-                  DataColumn(label: Text("Description")),
-                  DataColumn(label: Center(child: Text("Actions"))),
+                sortColumnIndex: sortColumnIndex,
+                sortAscending: sortValue,
+                columns: [
+                  DataColumn(
+                    label: const Center(child: Text("Id")),
+                    onSort: (columnIndex, ascending) {
+                      sort((category) => category.id!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Name")),
+                    onSort: (columnIndex, ascending) {
+                      sort(
+                          (category) => category.name!, columnIndex, ascending);
+                    },
+                  ),
+                  DataColumn(
+                    label: const Center(child: Text("Description")),
+                    onSort: (columnIndex, ascending) {
+                      sort((category) => category.description!, columnIndex,
+                          ascending);
+                    },
+                  ),
+                  const DataColumn(label: Center(child: Text("Actions"))),
                 ],
                 source: CategoriesTableSource(
                     categoriesList: categories,
@@ -112,19 +148,19 @@ class _CategoriesViewState extends State<CategoriesView> {
 
   CustomTextFormField search(BuildContext context) {
     return CustomTextFormField(
-            onChanged: (value) async {
-              await filterCategories(value);
-            },
-            textInputAction: TextInputAction.done,
-            keyboardType: TextInputType.text,
-            prefixIcon: IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.search,
-                  color: Theme.of(context).primaryColor,
-                )),
-            label: "Search",
-          );
+      onChanged: (value) async {
+        await filterCategories(value);
+      },
+      textInputAction: TextInputAction.done,
+      keyboardType: TextInputType.text,
+      prefixIcon: IconButton(
+          onPressed: () {},
+          icon: Icon(
+            Icons.search,
+            color: Theme.of(context).primaryColor,
+          )),
+      label: "Search",
+    );
   }
 
   Future<void> filterCategories(String query) async {
@@ -134,10 +170,11 @@ class _CategoriesViewState extends State<CategoriesView> {
     WHERE name LIKE '%$query%' OR description LIKE '%$query%';
   """);
     setState(() {
-      categories = result.map((map) => CategoryData(
-          name: map['name']as String,
-          description: map["description"] as String
-      )).toList();
+      categories = result
+          .map((map) => CategoryData(
+              name: map['name'] as String,
+              description: map["description"] as String))
+          .toList();
     });
   }
 
@@ -194,9 +231,10 @@ class CategoriesTableSource extends DataTableSource {
     return DataRow2(
         //onSelectChanged: (value){},
         cells: [
-          DataCell(Text("${categoriesList?[index].id}")),
-          DataCell(Text("${categoriesList?[index].name}")),
-          DataCell(Text("${categoriesList?[index].description}")),
+          DataCell(Center(child: Text("${categoriesList?[index].id}"))),
+          DataCell(Center(child: Text("${categoriesList?[index].name}"))),
+          DataCell(
+              Center(child: Text("${categoriesList?[index].description}"))),
           DataCell(
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -205,7 +243,10 @@ class CategoriesTableSource extends DataTableSource {
                     onPressed: () {
                       onUpdate(categoriesList![index]);
                     },
-                    icon: const Icon(Icons.edit)),
+                    icon: const Icon(
+                      Icons.edit,
+                      color: Color(0xff0157DB),
+                    )),
                 IconButton(
                     onPressed: () async {
                       onDelete(categoriesList![index]);
