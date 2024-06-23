@@ -1,4 +1,3 @@
-
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/order_item_model.dart';
 import 'package:easy_pos_r5/models/order_model.dart';
@@ -9,7 +8,7 @@ import 'package:get_it/get_it.dart';
 class StaticsView extends StatefulWidget {
   final Order? order;
   final OrderItem? orderItem;
-  const StaticsView({this.order,this.orderItem,super.key});
+  const StaticsView({this.order, this.orderItem, super.key});
 
   @override
   State<StaticsView> createState() => _StaticsViewState();
@@ -30,7 +29,7 @@ class _StaticsViewState extends State<StaticsView> {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
       var data = await sqlHelper.db!.rawQuery("""
-      select O.* ,P.name ,P. image 
+      select O.* ,P.name ,P. image ,p.price
       from orderProductItems O
       inner join products P
       where O.productId = P.id
@@ -44,13 +43,13 @@ class _StaticsViewState extends State<StaticsView> {
       } else {
         productItems = [];
       }
-
     } catch (e) {
       print('Error In get data $e');
       productItems = [];
     }
     setState(() {});
   }
+
   void getOrders() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -99,34 +98,33 @@ class _StaticsViewState extends State<StaticsView> {
                 color: Colors.green,
                 borderRadius: BorderRadius.circular(5),
               ),
-
-
-                  child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Total Sales : ',
-                        style: TextStyle(
-                         color: Colors.white,
-                          fontWeight: FontWeight.w200,
-                            ),
-                      ),
-                      Text(
-                        ' $totalSales',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Total Sales : ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w200,
+                    ),
                   ),
-
-
+                  Text(
+                    ' $totalSales',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(
               height: 20,
             ),
-            const Text("Products Sold",style: TextStyle(fontWeight: FontWeight.w700),),
+            const Text(
+              "Products Sold",
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -135,28 +133,49 @@ class _StaticsViewState extends State<StaticsView> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: productItems?.length ?? 0,
               itemBuilder: (context, index) {
-
+                var item = productItems?[index];
 
                 return ListTile(
-                  leading: Image.network(productItems?[index].product?.image ?? '',fit: BoxFit.cover,),
+                  leading: Card(
+                    color: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    child: Image.network(
+                      item?.product?.image ?? '',
+                      fit: BoxFit.cover,
+                      scale: 0.6,
+                    ),
+                  ),
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(productItems?[index].product?.name ?? '',
+                      Text(
+                        item?.product?.name ?? '',
                         style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),),
-                      const SizedBox(height: 8,),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
                       Row(
                         children: [
-                          Text("Sold : ${productItems?[index].productCount ?? ''}",
-                            style: const TextStyle(color: Colors.green,fontWeight: FontWeight.w600,),),
-                          const SizedBox(width: 12,),
-                          Text("discount :${orders?[index].discount?? 0} ",
-                            style: const TextStyle(color: Colors.green,fontWeight: FontWeight.w600,),),
-                          const SizedBox(width: 12,),
-                          Text("Total :${orders?[index].paidPrice?? 0} ",
-                            style: const TextStyle(color: Colors.green,fontWeight: FontWeight.w600,),),
+                          Text(
+                            'Sold: ${item?.productCount ?? ''}',
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 12,
+                          ),
+                          Text(
+                            ' Total: ${(item?.productCount ?? 0) * (item?.product?.price ?? 0)}',
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -169,5 +188,4 @@ class _StaticsViewState extends State<StaticsView> {
       ),
     );
   }
-  }
-
+}

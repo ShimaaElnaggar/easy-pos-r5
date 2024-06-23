@@ -118,8 +118,11 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                               ),
                               for (var orderItem in selectedOrderItem)
                                 ListTile(
-                                  leading: Image.network(
-                                      orderItem.product?.image ?? ''),
+                                  leading: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.network(
+                                        orderItem.product?.image ?? ''),
+                                  ),
                                   title: Text(orderItem.product?.name ?? ''),
                                   trailing: Container(
                                     height: 25,

@@ -98,17 +98,14 @@ class _AllSalesState extends State<AllSales> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Column(
-          children: [
-            search(),
-            (orders?.isEmpty ?? true)
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(200.0),
-                      child: Text("No data found"),
-                    ),
-                  )
-                : Expanded(
+        child: (orders?.isEmpty ?? true)
+            ? const Center(
+                child: Text("No data found"),
+              )
+            : Column(
+                children: [
+                  search(),
+                  Expanded(
                     child: ListView.builder(
                       itemCount: orders?.length ?? 0,
                       itemBuilder: (context, index) {
@@ -189,7 +186,7 @@ class _AllSalesState extends State<AllSales> {
                                               horizontal: 10),
                                           child: Divider(
                                             color: Colors.grey,
-                                            thickness: 1,
+                                            thickness: 2,
                                           ),
                                         ),
                                         Padding(
@@ -198,54 +195,100 @@ class _AllSalesState extends State<AllSales> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                '${productItems?[index].product?.name}',
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Text(
-                                                orders?[index].label ?? '',
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w200,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    '${productItems?[index].productCount} * ${productItems?[index].product?.price}',
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w200,
-                                                    ),
+                                              for (var item
+                                                  in productItems ?? [])
+                                                if (item.orderId ==
+                                                    orders![index].id)
+                                                  Column(
+                                                    children: [
+                                                      ListTile(
+                                                        leading: Image.network(
+                                                          item?.product
+                                                                  ?.image ??
+                                                              '',
+                                                          fit: BoxFit.cover,
+                                                          scale: 2,
+                                                        ),
+                                                        title: Column(
+                                                          children: [
+                                                            Text(
+                                                              item.product
+                                                                      ?.name ??
+                                                                  '',
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                            Text(
+                                                              orders?[index]
+                                                                      .label ??
+                                                                  '',
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Column(
+                                                        children: [
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Text(
+                                                                '${item.productCount} * ${item.product?.price}',
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w200,
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                ' Total : ${item.productCount * item.product?.price}',
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w200,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const Padding(
+                                                            padding:
+                                                                EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        50),
+                                                            child: Divider(
+                                                              color:
+                                                                  Colors.grey,
+                                                              thickness: 1,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                    ],
                                                   ),
-                                                  Text(
-                                                    ' Total : ${orders?[index].totalPrice ?? 0}',
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w200,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
                                             ],
-                                          ),
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          child: Divider(
-                                            color: Colors.grey,
-                                            thickness: 1,
                                           ),
                                         ),
                                         Padding(
@@ -254,6 +297,14 @@ class _AllSalesState extends State<AllSales> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.end,
                                             children: [
+                                              Text(
+                                                  'Total Price : ${orders?[index].totalPrice ?? 0}',
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w200,
+                                                  )),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.end,
@@ -298,8 +349,8 @@ class _AllSalesState extends State<AllSales> {
                       },
                     ),
                   ),
-          ],
-        ),
+                ],
+              ),
       ),
     );
   }
@@ -359,8 +410,8 @@ class _AllSalesState extends State<AllSales> {
               label: 'Search',
             ),
           ),
-          SizedBox(width: 10),
-          Container(
+          const SizedBox(width: 10),
+          SizedBox(
             width: 80,
             child: CustomTextFormField(
               label: 'Min Price',
@@ -373,8 +424,8 @@ class _AllSalesState extends State<AllSales> {
               },
             ),
           ),
-          SizedBox(width: 10),
-          Container(
+          const SizedBox(width: 10),
+          SizedBox(
             width: 80,
             child: CustomTextFormField(
               label: 'Max Price',
