@@ -72,7 +72,10 @@ class SqlHelper {
           totalPrice REAL,
           paidPrice REAL,
           discount REAL,
+          createdAtDate TEXT,
+          createdAtTime TEXT,
           clientId INTEGER NOT NULL,
+          paymentStatus TEXT,
           foreign key(clientId) references clients(id)
           on delete restrict
           ) 

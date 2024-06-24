@@ -8,6 +8,7 @@ import 'package:easy_pos_r5/widgets/custom_elevated_button.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 
 class SalesOpsView extends StatefulWidget {
   final Order? order;
@@ -25,6 +26,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
   List<OrderItem> selectedOrderItem = [];
   GlobalKey formKey = GlobalKey<FormState>();
   TextEditingController? discountController;
+  bool isPaid = true;
   @override
   void initState() {
     initView();
@@ -220,11 +222,24 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                       color: Theme.of(context).primaryColor,
                                       width: 2),
                                 ),
-                                child: Text(
-                                  'Paid Price : ${widget.order?.discount == 0 ? calculateTotalPrice :paidPrice}',
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor),
-                                ),
+                                    child:Text(
+                                      'Paid Price : ${widget.order?.discount == 0 ? calculateTotalPrice :paidPrice}',
+                                      style: TextStyle(
+                                          color: Theme.of(context).primaryColor),
+                                    ),
+
+
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Switch(
+                                value: isPaid,
+                                onChanged: (value) {
+                                  setState(() {
+                                    isPaid = value;
+                                  });
+                                },
                               ),
                               const SizedBox(
                                 height: 20,
@@ -454,12 +469,16 @@ class _SalesOpsViewState extends State<SalesOpsView> {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
       var discount = double.tryParse(discountController?.text ?? '0') ?? 0;
+      PaymentStatus paymentStatus = isPaid ? PaymentStatus.paid : PaymentStatus.notPaid;
       var orderId = await sqlHelper.db!.insert('orders', {
         'label': orderLabel,
         'totalPrice': calculateTotalPrice,
         'discount': discount,
         'paidPrice': paidPrice,
         'clientId': selectedID,
+        'createdAtDate': DateFormat('dd-MM-yyyy').format(DateTime.now()),
+        'createdAtTime': DateFormat('h:mm a').format(DateTime.now()),
+        'paymentStatus': paymentStatus == PaymentStatus.paid ? 'paid' : 'notPaid',
       });
 
       var batch = sqlHelper.db!.batch();
@@ -478,6 +497,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
           content: Text('Order Set Successfully')));
       Navigator.pop(context, true);
     } catch (e) {
+      print('Error In Create Order : $e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
           content: Text('Error In Create Order : $e')));

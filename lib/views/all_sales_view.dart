@@ -6,9 +6,10 @@ import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:intl/intl.dart';
+
 
 class AllSales extends StatefulWidget {
+
   const AllSales({super.key});
 
   @override
@@ -18,8 +19,6 @@ class AllSales extends StatefulWidget {
 class _AllSalesState extends State<AllSales> {
   List<Order>? orders;
   List<OrderItem>? productItems;
-  String formattedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
-  String formattedTime = DateFormat('h:mm a').format(DateTime.now());
   bool? isPaid = true;
   double minPrice = 0.0;
   double maxPrice = double.infinity;
@@ -124,12 +123,12 @@ class _AllSalesState extends State<AllSales> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          formattedDate,
+                                          '${orders?[index].createdAtDate ?? 0}',
                                           style: const TextStyle(
                                               fontWeight: FontWeight.w600),
                                         ),
                                         Text(
-                                          'Total : ${orders?[index].totalPrice ?? 0}',
+                                          'Total : ${orders?[index].totalPrice ?? ''}',
                                           style: const TextStyle(
                                               fontWeight: FontWeight.w100),
                                         ),
@@ -152,7 +151,7 @@ class _AllSalesState extends State<AllSales> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text("Receipt : $formattedTime ",
+                                              Text(" Receipt : ${orders?[index].createdAtTime ?? '' } ",
                                                   style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.w600)),
@@ -283,9 +282,7 @@ class _AllSalesState extends State<AllSales> {
                                                           ),
                                                         ],
                                                       ),
-                                                      const SizedBox(
-                                                        height: 10,
-                                                      ),
+
                                                     ],
                                                   ),
                                             ],
@@ -329,7 +326,7 @@ class _AllSalesState extends State<AllSales> {
                                                 height: 10,
                                               ),
                                               Text(
-                                                '$isPaid',
+                                                '${orders?[index].paymentStatus}',
                                                 style: const TextStyle(
                                                   color: Colors.green,
                                                   fontWeight: FontWeight.w600,
@@ -391,19 +388,18 @@ class _AllSalesState extends State<AllSales> {
 
   Padding search() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
           Expanded(
             child: CustomTextFormField(
               prefixIcon: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.search,
-                    color: Theme.of(context).primaryColor,
-                  )),
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.search,
+                  color: Colors.blue, // Use the desired color here
+                ),
+              ),
               onChanged: (value) async {
                 await filterOrders(value);
               },
@@ -412,7 +408,7 @@ class _AllSalesState extends State<AllSales> {
           ),
           const SizedBox(width: 10),
           SizedBox(
-            width: 80,
+            width: 90,
             child: CustomTextFormField(
               label: 'Min Price',
               keyboardType: TextInputType.number,
@@ -426,7 +422,7 @@ class _AllSalesState extends State<AllSales> {
           ),
           const SizedBox(width: 10),
           SizedBox(
-            width: 80,
+            width: 90,
             child: CustomTextFormField(
               label: 'Max Price',
               keyboardType: TextInputType.number,
@@ -444,18 +440,20 @@ class _AllSalesState extends State<AllSales> {
   }
 
   Future<void> filterOrders(String query) async {
-    var sqlHelper = GetIt.I.get<SqlHelper>();
-    final List<Map<String, dynamic>> maps = await sqlHelper.db!.rawQuery("""
-    SELECT * FROM orders
-    WHERE (label LIKE '%$query%' OR paidPrice LIKE '%$query%')
-    AND price >= $minPrice AND price <= $maxPrice;
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      final List<Map<String, dynamic>> maps = await sqlHelper.db!.rawQuery("""
+     SELECT * FROM orders
+               WHERE (label LIKE '%$query%' OR paidPrice LIKE '%$query%')
+               AND paidPrice >= $minPrice AND paidPrice <= $maxPrice;
   """);
 
-    setState(() {
-      orders = maps
-          .map((map) => Order(label: map['label'], paidPrice: map['paidPrice']))
-          .toList();
-    });
+      setState(() {
+        orders = maps.map((map) => Order.fromJson(map)).toList();
+      });
+    } catch (e) {
+      print('Error filtering orders: $e');
+    }
   }
 
   Future<void> onDeleteRow(int id) async {
