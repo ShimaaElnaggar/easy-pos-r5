@@ -178,6 +178,7 @@ class _ProductsOpsState extends State<ProductsOps> {
                 onPressed: () async {
                   await onSubmit();
                 },
+                fixedSize: const Size(double.maxFinite, 60),
                 title: "Submit",
               ),
             ],

@@ -153,6 +153,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                 onPressed: () {
                                   onAddProduct();
                                 },
+                                fixedSize: const Size(double.maxFinite, 60),
                                 title: 'Add Products',
                               ),
                               const SizedBox(
@@ -261,6 +262,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                     : () async {
                         await onSetOrder();
                       },
+                fixedSize: const Size(double.maxFinite, 60),
                 title: 'Add Order',
               ),
             ],
@@ -327,65 +329,68 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                         vertical: 10),
                                     child: ListTile(
                                       leading: Image.network(
-                                          product.image ?? 'No Image'),
+                                          product.image ?? 'No Image',),
                                       title: Text(product.name ?? 'No Name'),
                                       subtitle: getOrderItem(product.id!) ==
                                               null
                                           ? null
-                                          : Row(
-                                              children: [
-                                                IconButton(
-                                                    onPressed: getOrderItem(
-                                                                    product
-                                                                        .id!) !=
-                                                                null &&
-                                                            getOrderItem(product
-                                                                        .id!)
-                                                                    ?.productCount ==
-                                                                1
-                                                        ? null
-                                                        : () {
-                                                            var orderItem =
-                                                                getOrderItem(
-                                                                    product
-                                                                        .id!);
-                                                            orderItem
-                                                                    ?.productCount =
-                                                                (orderItem.productCount ??
-                                                                        0) -
-                                                                    1;
-                                                            dialogueSetState(
-                                                                () {});
-                                                          },
-                                                    icon: const Icon(
-                                                        Icons.remove)),
-                                                Text(getOrderItem(product.id!)!
-                                                    .productCount
-                                                    .toString()),
-                                                IconButton(
-                                                    onPressed: () {
-                                                      var orderItem =
-                                                          getOrderItem(
-                                                              product.id!);
+                                          : SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                            child: Row(
+                                                children: [
+                                                  IconButton(
+                                                      onPressed: getOrderItem(
+                                                                      product
+                                                                          .id!) !=
+                                                                  null &&
+                                                              getOrderItem(product
+                                                                          .id!)
+                                                                      ?.productCount ==
+                                                                  1
+                                                          ? null
+                                                          : () {
+                                                              var orderItem =
+                                                                  getOrderItem(
+                                                                      product
+                                                                          .id!);
+                                                              orderItem
+                                                                      ?.productCount =
+                                                                  (orderItem.productCount ??
+                                                                          0) -
+                                                                      1;
+                                                              dialogueSetState(
+                                                                  () {});
+                                                            },
+                                                      icon: const Icon(
+                                                          Icons.remove)),
+                                                  Text(getOrderItem(product.id!)!
+                                                      .productCount
+                                                      .toString()),
+                                                  IconButton(
+                                                      onPressed: () {
+                                                        var orderItem =
+                                                            getOrderItem(
+                                                                product.id!);
 
-                                                      if ((orderItem
-                                                                  ?.productCount ??
-                                                              0) <
-                                                          (product.stock ??
-                                                              0)) {
-                                                        orderItem
-                                                                ?.productCount =
-                                                            (orderItem.productCount ??
-                                                                    0) +
-                                                                1;
-                                                      }
+                                                        if ((orderItem
+                                                                    ?.productCount ??
+                                                                0) <
+                                                            (product.stock ??
+                                                                0)) {
+                                                          orderItem
+                                                                  ?.productCount =
+                                                              (orderItem.productCount ??
+                                                                      0) +
+                                                                  1;
+                                                        }
 
-                                                      dialogueSetState(() {});
-                                                    },
-                                                    icon:
-                                                        const Icon(Icons.add)),
-                                              ],
-                                            ),
+                                                        dialogueSetState(() {});
+                                                      },
+                                                      icon:
+                                                          const Icon(Icons.add)),
+                                                ],
+                                              ),
+                                          ),
                                       trailing: getOrderItem(product.id!) ==
                                               null
                                           ? IconButton(

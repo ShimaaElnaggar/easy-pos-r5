@@ -75,6 +75,7 @@ class _CategoryOperationsViewState extends State<CategoryOperationsView> {
                 onPressed: () async {
                   await onSubmit();
                 },
+                fixedSize: const Size(double.maxFinite, 60),
                 title: "Submit",
               ),
             ],

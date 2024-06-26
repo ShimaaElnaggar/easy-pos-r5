@@ -90,6 +90,7 @@ class _ClientsOperationsState extends State<ClientsOperations> {
                   onPressed: ()async{
                     await onSubmit();
                   },
+                fixedSize: const Size(double.maxFinite, 60),
                   title: "Submit",
               ),
             ],
