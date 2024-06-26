@@ -1,5 +1,6 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/exchange_rate_model.dart';
+import 'package:easy_pos_r5/models/order_model.dart';
 import 'package:easy_pos_r5/views/all_sales_view.dart';
 import 'package:easy_pos_r5/views/categories_view.dart';
 import 'package:easy_pos_r5/views/clients_view.dart';
@@ -10,11 +11,10 @@ import 'package:easy_pos_r5/widgets/grid_view_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 
 class HomeView extends StatefulWidget {
-  final ExchangeRate? exchangeRate;
-  const HomeView({this.exchangeRate, super.key});
-
+  const HomeView({ super.key});
   @override
   State<HomeView> createState() => _HomeViewState();
 }
@@ -23,7 +23,8 @@ class _HomeViewState extends State<HomeView> {
   bool isLoading = true;
   bool isTableInitialized = false;
   List<ExchangeRate>? exchangeRates;
-
+  List<Order>? orders;
+  double totalSales = 0;
   @override
   void initState() {
     initTables();
@@ -35,10 +36,12 @@ class _HomeViewState extends State<HomeView> {
     isTableInitialized = await sqlHelper.createTables();
     isLoading = false;
     setState(() {
+
     });
 
     await insertRate();
     getExchangeRate();
+    getOrders();
   }
 
   void getExchangeRate() async {
@@ -69,8 +72,29 @@ class _HomeViewState extends State<HomeView> {
     setState(() {});
   }
 
-  double calculateTodaySales() {
-    return 1000.0;
+  void getOrders() async {
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var data = await sqlHelper.db!.rawQuery("""
+      select O.* ,C.name as clientName,C.phone as clientPhone,C.address as clientAddress 
+      from orders O
+      inner join clients C
+      where O.clientId = C.id
+    """);
+
+      if (data.isNotEmpty) {
+        orders = [];
+        for (var item in data) {
+          orders!.add(Order.fromJson(item));
+        }
+        calculateTodaySales(); // Recalculate totalSales after adding orders
+      } else {
+        orders = [];
+      }
+    } catch (e) {
+      print('Error In get data $e');
+      orders = [];
+    }
   }
 
   @override
@@ -86,8 +110,8 @@ class _HomeViewState extends State<HomeView> {
               Expanded(
                 child: Container(
                   height: kIsWeb
-                      ? MediaQuery.of(context).size.height / 3 + 82
-                      : MediaQuery.of(context).size.height / 3 + 18,
+                      ? MediaQuery.of(context).size.height / 3 + 85
+                      : MediaQuery.of(context).size.height / 3 + 19,
                   color: Theme.of(context).primaryColor,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -125,12 +149,13 @@ class _HomeViewState extends State<HomeView> {
                           ],
                         ),
                         const SizedBox(
-                          height: 12,
+                          height: 10,
                         ),
                         if (exchangeRates != null && exchangeRates!.isNotEmpty)
                           CardHeaderItem(
                             title: "Exchange Rate",
-                            subTitle: '1'
+                            subTitle: isLoading ?
+                            'Calculating...' : '1'
                                 ' '
                                 '${exchangeRates![0].currencyFrom.toString()}'
                                 ' '
@@ -140,16 +165,15 @@ class _HomeViewState extends State<HomeView> {
                                 ' '
                                 '${exchangeRates![0].currencyTo.toString()}',
                           ),
-                        if (exchangeRates == null || exchangeRates!.isEmpty)
-                          const SizedBox(
-                            height: 24,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                        const SizedBox(
+                            height: 5,
+
                           ),
                         CardHeaderItem(
-                          title: "Today's sales",
-                          subTitle: calculateTodaySales().toString(),
+                          title: "Today's Sales",
+                          subTitle: isLoading ?
+                          'Calculating...' :
+                          (orders != null ? totalSales.toString() : 'No orders available'),
                         ),
                       ],
                     ),
@@ -253,5 +277,28 @@ class _HomeViewState extends State<HomeView> {
         ),
       );
     }
+  }
+
+  Future<void> calculateTodaySales() async {
+    DateTime now = DateTime.now();
+    String currentDate = DateFormat('dd-MM-yyyy').format(now);
+    var sqlHelper = GetIt.I.get<SqlHelper>();
+    var result = await sqlHelper.db!.query(
+      'orders',
+      columns: ['paidPrice'],
+      where: 'createdAtDate = ?',
+      whereArgs: [currentDate],
+    );
+
+    double totalSales = 0;
+
+    for (var row in result) {
+      totalSales += row['paidPrice'] as double;
+    }
+
+    setState(() {
+      this.totalSales = totalSales;
+      print('Rebuilding widget with totalSales: $totalSales');
+    });
   }
 }
