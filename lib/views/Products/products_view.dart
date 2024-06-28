@@ -253,20 +253,7 @@ class _ProductsViewState extends State<ProductsView> {
                WHERE name LIKE '%$query%' OR description LIKE '%$query%' OR price LIKE '%$query%'
               """);
     setState(() {
-      products = result
-          .map((map) => Product(
-                name: map['name'] as String,
-                description: map["description"] as String,
-                price: map["price"] as double,
-                id: map['id'] as int,
-                image: map['image'] as String,
-                isAvailable: map['isAvailable'] == 1 ? true : false,
-                stock: map['stock'] as int,
-                categoryDesc: map['categoryDesc'] as String,
-                categoryId: map['categoryId'] as int,
-                categoryName: map['categoryName'] as String,
-              ))
-          .toList();
+      products = result.map((map) => Product.fromJson(map)).toList();
     });
   }
 
