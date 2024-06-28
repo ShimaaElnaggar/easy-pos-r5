@@ -1,7 +1,8 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/order_item_model.dart';
 import 'package:easy_pos_r5/models/order_model.dart';
-import 'package:easy_pos_r5/views/statics_view.dart';
+import 'package:easy_pos_r5/views/Statics/statics_view.dart';
 import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,8 @@ import 'package:get_it/get_it.dart';
 
 
 class AllSales extends StatefulWidget {
-
-  const AllSales({super.key});
+final Order?order;
+  const AllSales({this.order,super.key});
 
   @override
   State<AllSales> createState() => _AllSalesState();
@@ -19,7 +20,7 @@ class AllSales extends StatefulWidget {
 class _AllSalesState extends State<AllSales> {
   List<Order>? orders;
   List<OrderItem>? productItems;
-  bool? isPaid = true;
+ // bool? isPaid = true;
   double minPrice = 0.0;
   double maxPrice = double.infinity;
   @override
@@ -87,12 +88,14 @@ class _AllSalesState extends State<AllSales> {
       floatingActionButton: SizedBox(
         height: 50,
         width: 150,
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const StaticsView()));
-          },
-          child: const Text('Show Product Sold'),
+        child: FadeInRight(
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const StaticsView()));
+            },
+            child: const Text('Show Product Sold'),
+          ),
         ),
       ),
       body: Padding(
@@ -318,20 +321,20 @@ class _AllSalesState extends State<AllSales> {
                                                 height: 10,
                                               ),
                                               Text(
-                                                  'Paid Price : ${orders?[index].paidPrice ?? 0}',
+                                                  'Paid Price : ${orders?[index].paidPrice??0}',
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.w600,
                                                   )),
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                              Text(
-                                                '${orders?[index].paymentStatus}',
-                                                style: const TextStyle(
-                                                  color: Colors.green,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
+                                              // Text(
+                                              //   '${orders?[index].paymentStatus}',
+                                              //   style: const TextStyle(
+                                              //     color: Colors.green,
+                                              //     fontWeight: FontWeight.w600,
+                                              //   ),
+                                              // ),
                                             ],
                                           ),
                                         ),
@@ -373,10 +376,7 @@ class _AllSalesState extends State<AllSales> {
             onDeleteRow(orders?[index].id ?? 0);
             break;
           case 'update':
-            // Handle update action
-            break;
-          case 'show':
-            // Handle show action
+           // onUpdateRow(orders?[index].id??0);
             break;
           default:
             // Handle other cases
@@ -395,9 +395,11 @@ class _AllSalesState extends State<AllSales> {
             child: CustomTextFormField(
               prefixIcon: IconButton(
                 onPressed: () {},
-                icon: const Icon(
-                  Icons.search,
-                  color: Colors.blue, // Use the desired color here
+                icon:  FadeInLeft(
+                  child: const Icon(
+                    Icons.search,
+                    color: Colors.blue, // Use the desired color here
+                  ),
                 ),
               ),
               onChanged: (value) async {
@@ -406,34 +408,34 @@ class _AllSalesState extends State<AllSales> {
               label: 'Search',
             ),
           ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 90,
-            child: CustomTextFormField(
-              label: 'Min Price',
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                setState(() {
-                  minPrice = double.tryParse(value) ?? 0.0;
-                });
-                filterOrders('');
-              },
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 90,
-            child: CustomTextFormField(
-              label: 'Max Price',
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                setState(() {
-                  maxPrice = double.tryParse(value) ?? double.infinity;
-                });
-                filterOrders('');
-              },
-            ),
-          ),
+          // const SizedBox(width: 10),
+          // SizedBox(
+          //   width: 90,
+          //   child: CustomTextFormField(
+          //     label: 'Min Price',
+          //     keyboardType: TextInputType.number,
+          //     onChanged: (value) {
+          //       setState(() {
+          //         minPrice = double.tryParse(value) ?? 0.0;
+          //       });
+          //       filterOrders('');
+          //     },
+          //   ),
+          // ),
+          // const SizedBox(width: 10),
+          // SizedBox(
+          //   width: 90,
+          //   child: CustomTextFormField(
+          //     label: 'Max Price',
+          //     keyboardType: TextInputType.number,
+          //     onChanged: (value) {
+          //       setState(() {
+          //         maxPrice = double.tryParse(value) ?? double.infinity;
+          //       });
+          //       filterOrders('');
+          //     },
+          //   ),
+          // ),
         ],
       ),
     );
@@ -444,8 +446,8 @@ class _AllSalesState extends State<AllSales> {
       var sqlHelper = GetIt.I.get<SqlHelper>();
       final List<Map<String, dynamic>> maps = await sqlHelper.db!.rawQuery("""
      SELECT * FROM orders
-               WHERE (label LIKE '%$query%' OR paidPrice LIKE '%$query%')
-               AND paidPrice >= $minPrice AND paidPrice <= $maxPrice;
+               WHERE label LIKE '%$query%' OR paidPrice LIKE '%$query%'
+              
   """);
 
       setState(() {
@@ -459,28 +461,28 @@ class _AllSalesState extends State<AllSales> {
   Future<void> onDeleteRow(int id) async {
     try {
       var dialogResult = await showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Delete Order'),
-              content:
-                  const Text('Are you sure you want to delete this order?'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: const Text('Delete'),
-                ),
-              ],
-            );
-          });
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Delete Order'),
+            content: const Text('Are you sure you want to delete this order?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                child: const Text('Delete'),
+              ),
+            ],
+          );
+        },
+      );
 
       if (dialogResult ?? false) {
         var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -490,22 +492,17 @@ class _AllSalesState extends State<AllSales> {
           whereArgs: [id],
         );
         if (result > 0) {
+          getProductItems(); // Pass the deleted order ID to getProductItems
           getOrders();
         }
       }
-      // if (dialogResult ?? false) {
-      //   var sqlHelper = GetIt.I.get<SqlHelper>();
-      //   var result = await sqlHelper.db!.delete(
-      //     'orderProductItems',
-      //     where: 'id =?',
-      //     whereArgs: [id],
-      //   );
-      //   if (result > 0) {
-      //     getProductItems();
-      //   }
-      // }
     } catch (e) {
       print('Error In delete data $e');
     }
   }
-}
+
+
+
+  }
+
+

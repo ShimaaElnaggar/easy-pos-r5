@@ -5,10 +5,10 @@ import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+
 class StaticsView extends StatefulWidget {
-  final Order? order;
-  final OrderItem? orderItem;
-  const StaticsView({this.order, this.orderItem, super.key});
+
+  const StaticsView({ super.key});
 
   @override
   State<StaticsView> createState() => _StaticsViewState();
@@ -17,6 +17,7 @@ class StaticsView extends StatefulWidget {
 class _StaticsViewState extends State<StaticsView> {
   List<OrderItem>? productItems;
   List<Order>? orders;
+  String selectedFilter = 'Last Week';
 
   @override
   void initState() {
@@ -24,16 +25,17 @@ class _StaticsViewState extends State<StaticsView> {
     getOrders();
     super.initState();
   }
-
   void getProductItems() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
       var data = await sqlHelper.db!.rawQuery("""
-      select O.* ,P.name ,P. image ,p.price
-      from orderProductItems O
-      inner join products P
-      where O.productId = P.id
-      """);
+    select I.* ,P.name ,P.image ,P.price
+    from orderProductItems I
+    inner join products P
+    on I.productId = P.id
+    inner join orders O
+    on I.orderId = O.id
+    """);
 
       if (data.isNotEmpty) {
         productItems = [];
@@ -49,6 +51,7 @@ class _StaticsViewState extends State<StaticsView> {
     }
     setState(() {});
   }
+
 
   void getOrders() async {
     try {
@@ -75,6 +78,7 @@ class _StaticsViewState extends State<StaticsView> {
     setState(() {});
   }
 
+
   @override
   Widget build(BuildContext context) {
     double totalSales = 0;
@@ -90,6 +94,28 @@ class _StaticsViewState extends State<StaticsView> {
         padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
+            // Padding(
+            //   padding: const EdgeInsets.all(10.0),
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       borderRadius: BorderRadius.circular(5),
+            //       border: Border.all(color: Colors.grey),
+            //     ),
+            //     child: Container(
+            //       padding: EdgeInsets.symmetric(horizontal: 10),
+            //       child: DropdownButton<String>(
+            //         value: selectedFilter,
+            //         onChanged: (String? newValue) {
+            //           setState(() {
+            //             selectedFilter = newValue!;
+            //             getOrders();
+            //           });
+            //         },
+            //         items: generateDropdownItems(),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             Container(
               padding: const EdgeInsets.all(10),
               height: 60,
@@ -109,7 +135,7 @@ class _StaticsViewState extends State<StaticsView> {
                     ),
                   ),
                   Text(
-                    ' $totalSales',
+                    ' ${totalSales} EGP',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -133,6 +159,7 @@ class _StaticsViewState extends State<StaticsView> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: productItems?.length ?? 0,
               itemBuilder: (context, index) {
+
                 var item = productItems?[index];
 
                 return ListTile(

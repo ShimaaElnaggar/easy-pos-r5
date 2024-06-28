@@ -1,7 +1,9 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/order_item_model.dart';
 import 'package:easy_pos_r5/models/order_model.dart';
 import 'package:easy_pos_r5/models/product.dart';
+import 'package:easy_pos_r5/views/Home/home_view.dart';
 import 'package:easy_pos_r5/widgets/clients_drop_down.dart';
 import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:easy_pos_r5/widgets/custom_elevated_button.dart';
@@ -12,7 +14,9 @@ import 'package:intl/intl.dart';
 
 class SalesOpsView extends StatefulWidget {
   final Order? order;
-  const SalesOpsView({this.order, super.key});
+  final List<OrderItem>? orderItems;
+  final OrderItem? orderItem;
+  const SalesOpsView({this.order, this.orderItems, this.orderItem, super.key});
 
   @override
   State<SalesOpsView> createState() => _SalesOpsViewState();
@@ -21,16 +25,17 @@ class SalesOpsView extends StatefulWidget {
 class _SalesOpsViewState extends State<SalesOpsView> {
   String? orderLabel;
   int? selectedID;
-  double paidPrice =0;
   List<Product>? products;
   List<OrderItem> selectedOrderItem = [];
   GlobalKey formKey = GlobalKey<FormState>();
   TextEditingController? discountController;
-  bool isPaid = true;
+  List<OrderItem>? productItems;
+  //bool isPaid = true;
   @override
   void initState() {
     initView();
     getProducts();
+    getProductItems();
     super.initState();
   }
 
@@ -41,7 +46,6 @@ class _SalesOpsViewState extends State<SalesOpsView> {
     selectedID = widget.order?.clientId;
     discountController =
         TextEditingController(text: '${widget.order?.discount ?? ''}');
-
   }
 
   void getProducts() async {
@@ -65,6 +69,31 @@ class _SalesOpsViewState extends State<SalesOpsView> {
     } catch (e) {
       print('Error In get data $e');
       products = [];
+    }
+    setState(() {});
+  }
+
+  void getProductItems() async {
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var data = await sqlHelper.db!.rawQuery("""
+      select I.* ,P.name ,P. image ,P.price
+      from orderProductItems I
+      inner join products P
+      where I.productId = P.id
+      """);
+
+      if (data.isNotEmpty) {
+        productItems = [];
+        for (var item in data) {
+          productItems!.add(OrderItem.fromJson(item));
+        }
+      } else {
+        productItems = [];
+      }
+    } catch (e) {
+      print('Error In get data $e');
+      productItems = [];
     }
     setState(() {});
   }
@@ -167,7 +196,8 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                 ),
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     'Total Price : ',
@@ -192,20 +222,17 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                   thickness: 1,
                                 ),
                               ),
-
                               const SizedBox(
                                 height: 20,
                               ),
-                               CustomTextFormField(
+                              CustomTextFormField(
                                 label: 'Add discount',
                                 controller: discountController,
                                 keyboardType: TextInputType.number,
                                 textInputAction: TextInputAction.done,
                                 onChanged: (value) {
                                   setState(() {
-                                    double discount = double.tryParse(value) ?? 0;
-                                    paidPrice = calculateTotalPrice -
-                                        (calculateTotalPrice * discount / 100) ;
+                                    calculatePaidPrice(value);
                                   });
                                 },
                               ),
@@ -223,25 +250,23 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                       color: Theme.of(context).primaryColor,
                                       width: 2),
                                 ),
-                                    child:Text(
-                                      'Paid Price : ${widget.order?.discount == 0 ? calculateTotalPrice :paidPrice}',
-                                      style: TextStyle(
-                                          color: Theme.of(context).primaryColor),
-                                    ),
-
-
+                                child: Text(
+                                  'Paid Price : ${calculatePaidPrice(discountController?.text)}',
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor),
+                                ),
                               ),
                               const SizedBox(
                                 height: 20,
                               ),
-                              Switch(
-                                value: isPaid,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isPaid = value;
-                                  });
-                                },
-                              ),
+                              // Switch(
+                              //   value: isPaid,
+                              //   onChanged: (value) {
+                              //     setState(() {
+                              //       isPaid = value;
+                              //     });
+                              //   },
+                              // ),
                               const SizedBox(
                                 height: 20,
                               ),
@@ -263,7 +288,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                         await onSetOrder();
                       },
                 fixedSize: const Size(double.maxFinite, 60),
-                title: 'Add Order',
+                title: 'Confirm',
               ),
             ],
           ),
@@ -280,7 +305,8 @@ class _SalesOpsViewState extends State<SalesOpsView> {
           builder: (context, dialogueSetState) {
             return Dialog(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 15),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
                 child: (products?.isEmpty ?? false)
                     ? const Center(
                         child: Text("No data found"),
@@ -298,25 +324,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                           const SizedBox(
                             height: 20,
                           ),
-                          CustomTextFormField(
-                            onChanged: (value) async {
-                              var sqlHelper = GetIt.I.get<SqlHelper>();
-                              var result = await sqlHelper.db!.rawQuery("""
-                                  SELECT * FROM products
-                                  WHERE name LIKE '%$value% OR price LIKE '%$value%' ;
-                                   """);
-
-                              print('values:$result');
-                            },
-                            textInputAction: TextInputAction.done,
-                            keyboardType: TextInputType.text,
-                            prefixIcon: IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.search,
-                                )),
-                            label: "Search",
-                          ),
+                          productSearch(context),
                           const SizedBox(
                             height: 20,
                           ),
@@ -329,14 +337,15 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                         vertical: 10),
                                     child: ListTile(
                                       leading: Image.network(
-                                          product.image ?? 'No Image',),
+                                        product.image ?? 'No Image',
+                                      ),
                                       title: Text(product.name ?? 'No Name'),
                                       subtitle: getOrderItem(product.id!) ==
                                               null
                                           ? null
                                           : SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                            child: Row(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
                                                 children: [
                                                   IconButton(
                                                       onPressed: getOrderItem(
@@ -363,9 +372,10 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                                             },
                                                       icon: const Icon(
                                                           Icons.remove)),
-                                                  Text(getOrderItem(product.id!)!
-                                                      .productCount
-                                                      .toString()),
+                                                  Text(
+                                                      getOrderItem(product.id!)!
+                                                          .productCount
+                                                          .toString()),
                                                   IconButton(
                                                       onPressed: () {
                                                         var orderItem =
@@ -386,11 +396,11 @@ class _SalesOpsViewState extends State<SalesOpsView> {
 
                                                         dialogueSetState(() {});
                                                       },
-                                                      icon:
-                                                          const Icon(Icons.add)),
+                                                      icon: const Icon(
+                                                          Icons.add)),
                                                 ],
                                               ),
-                                          ),
+                                            ),
                                       trailing: getOrderItem(product.id!) ==
                                               null
                                           ? IconButton(
@@ -408,7 +418,6 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                                             ),
                                     ),
                                   ),
-
                               ],
                             ),
                           ),
@@ -416,6 +425,7 @@ class _SalesOpsViewState extends State<SalesOpsView> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
+                            fixedSize: const Size(double.maxFinite, 60),
                             title: 'Back',
                           ),
                         ],
@@ -427,6 +437,39 @@ class _SalesOpsViewState extends State<SalesOpsView> {
       },
     );
     setState(() {});
+  }
+
+  CustomTextFormField productSearch(BuildContext context) {
+    return CustomTextFormField(
+      onChanged: (value) async {
+        var sqlHelper = GetIt.I.get<SqlHelper>();
+        var result = await sqlHelper.db!.rawQuery("""
+  SELECT * FROM orderProductItems
+  WHERE productCount LIKE '%$value%' OR product LIKE '%$value%';
+""");
+
+        setState(() {
+          productItems = result
+              .map((map) => OrderItem(
+                    product: Product.fromJson(map),
+                    productCount: map['productCount'] as int,
+                  ))
+              .toList();
+        });
+        print("result:$result");
+      },
+      textInputAction: TextInputAction.done,
+      keyboardType: TextInputType.text,
+      prefixIcon: IconButton(
+          onPressed: () {},
+          icon: FadeInLeft(
+            child: Icon(
+              Icons.search,
+              color: Theme.of(context).primaryColor,
+            ),
+          )),
+      label: "Search",
+    );
   }
 
   OrderItem? getOrderItem(int productId) {
@@ -463,27 +506,28 @@ class _SalesOpsViewState extends State<SalesOpsView> {
     return total;
   }
 
-  double calculatePaidPrice(Order order) {
-    if (order.discount != 0.0) {
-      return order.totalPrice??0 - (order.totalPrice??0 * order.discount! /100);
-    } else {
-      return order.totalPrice??0;
-    }
+  String calculatePaidPrice(value) {
+    double paidPrice = 0;
+    double discount = double.tryParse(value) ?? 0;
+    paidPrice = paidPrice +
+        (calculateTotalPrice - (calculateTotalPrice * discount / 100));
+    return paidPrice.toString();
   }
+
   Future<void> onSetOrder() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
       var discount = double.tryParse(discountController?.text ?? '0') ?? 0;
-      PaymentStatus paymentStatus = isPaid ? PaymentStatus.paid : PaymentStatus.notPaid;
+      //PaymentStatus paymentStatus = isPaid ? PaymentStatus.paid : PaymentStatus.notPaid;
       var orderId = await sqlHelper.db!.insert('orders', {
         'label': orderLabel,
         'totalPrice': calculateTotalPrice,
         'discount': discount,
-        'paidPrice': paidPrice,
+        'paidPrice': calculatePaidPrice(discount.toString()),
         'clientId': selectedID,
         'createdAtDate': DateFormat('dd-MM-yyyy').format(DateTime.now()),
         'createdAtTime': DateFormat('h:mm a').format(DateTime.now()),
-        'paymentStatus': paymentStatus == PaymentStatus.paid ? 'paid' : 'notPaid',
+        //'paymentStatus': paymentStatus == PaymentStatus.paid ? 'paid' : 'notPaid',
       });
 
       var batch = sqlHelper.db!.batch();
@@ -494,13 +538,15 @@ class _SalesOpsViewState extends State<SalesOpsView> {
           'productCount': orderItem.productCount ?? 0,
         });
       }
-
+      Navigator.pop(context, true);
       await batch.commit();
-
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           backgroundColor: Colors.green,
           content: Text('Order Set Successfully')));
-      Navigator.pop(context, true);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeView()),
+          (route) => false);
     } catch (e) {
       print('Error In Create Order : $e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -508,4 +554,74 @@ class _SalesOpsViewState extends State<SalesOpsView> {
           content: Text('Error In Create Order : $e')));
     }
   }
+//
+//   Future<void> onSetOrder() async {
+//     try {
+//       var sqlHelper = GetIt.I.get<SqlHelper>();
+//       var discount = double.tryParse(discountController?.text ?? '0') ?? 0;
+//       PaymentStatus paymentStatus = isPaid ? PaymentStatus.paid : PaymentStatus.notPaid;
+//       if(widget.order==null){
+//         var orderId = await sqlHelper.db!.insert('orders', {
+//           'label': orderLabel,
+//           'totalPrice': calculateTotalPrice,
+//           'discount': discount,
+//           'paidPrice': calculatePaidPrice(discount.toString()),
+//           'clientId': selectedID,
+//           'createdAtDate': DateFormat('dd-MM-yyyy').format(DateTime.now()),
+//           'createdAtTime': DateFormat('h:mm a').format(DateTime.now()),
+//           'paymentStatus': paymentStatus == PaymentStatus.paid ? 'paid' : 'notPaid',
+//         });
+// print('orderId: ${widget.order!.paidPrice!}');
+//         var batch = sqlHelper.db!.batch();
+//         for (var orderItem in selectedOrderItem) {
+//           batch.insert('orderProductItems', {
+//             'orderId': orderId,
+//             'productId': orderItem.productId,
+//             'productCount': orderItem.productCount ?? 0,
+//           });
+//         }
+//
+//         await batch.commit();
+//
+//       }else{
+//         await sqlHelper.db!.update(
+//           'orders',
+//           {
+//             'label': orderLabel,
+//             'totalPrice': calculateTotalPrice,
+//             'discount': discount,
+//             'paidPrice': calculatePaidPrice(discount),
+//             'clientId': selectedID,
+//             'createdAtDate': DateFormat('dd-MM-yyyy').format(DateTime.now()),
+//             'createdAtTime': DateFormat('h:mm a').format(DateTime.now()),
+//             'paymentStatus': paymentStatus == PaymentStatus.paid ? 'paid' : 'notPaid',
+//           },
+//           where: 'id = ?',
+//           whereArgs: [widget.order?.id],
+//         );
+//
+//
+//         for (var orderItem in selectedOrderItem) {
+//           sqlHelper.db!.update('orderProductItems', {
+//             'orderId': orderItem.orderId,
+//             'productId': orderItem.productId,
+//             'productCount': orderItem.productCount ?? 0,
+//           });
+//         }
+//       }
+//
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+//           backgroundColor: Colors.green,
+//           content: Text(
+//               widget.order == null?
+//               'Order Set Successfully':
+//                   'Order Updated Successfully',
+//           )));
+//       Navigator.pop(context, true);
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+//           backgroundColor: Colors.red,
+//           content: Text( widget.order == null?'Error In Create Order : $e':'Error In Update Order : $e')));
+//     }
+//   }
 }

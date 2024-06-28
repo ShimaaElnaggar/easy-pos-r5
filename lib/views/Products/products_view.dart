@@ -1,7 +1,8 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/product.dart';
-import 'package:easy_pos_r5/views/products_ops.dart';
+import 'package:easy_pos_r5/views/Products%20Operations/products_ops.dart';
 import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:easy_pos_r5/widgets/custom_data_table.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
@@ -96,7 +97,7 @@ class _ProductsViewState extends State<ProductsView> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            search(context),
+            searchAndFilter(context),
             const SizedBox(
               height: 20,
             ),
@@ -193,69 +194,78 @@ class _ProductsViewState extends State<ProductsView> {
     );
   }
 
-  search(BuildContext context) {
+  Row searchAndFilter(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: CustomTextFormField(
             onChanged: (value) async {
-              await filterProducts(value);
+              await searchProcess(value);
             },
             textInputAction: TextInputAction.done,
             prefixIcon: IconButton(
                 onPressed: () {},
-                icon: Icon(
-                  Icons.search,
-                  color: Theme.of(context).primaryColor,
+                icon: FadeInLeft(
+                  child: Icon(
+                    Icons.search,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 )),
             label: "Search",
           ),
         ),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 90,
-          child: CustomTextFormField(
-            label: 'Min Price',
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              setState(() {
-                minPrice = double.tryParse(value) ?? 0.0;
-              });
-              filterProducts('');
-            },
-          ),
-        ),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 90,
-          child: CustomTextFormField(
-            label: 'Max Price',
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              setState(() {
-                maxPrice = double.tryParse(value) ?? double.infinity;
-              });
-              filterProducts('');
-            },
-          ),
-        ),
+        // const SizedBox(width: 10),
+        // SizedBox(
+        //   width: 90,
+        //   child: CustomTextFormField(
+        //     label: 'Min Price',
+        //     keyboardType: TextInputType.number,
+        //     onChanged: (value) {
+        //       setState(() {
+        //         minPrice = double.tryParse(value) ?? 0.0;
+        //       });
+        //       searchProcess('');
+        //     },
+        //   ),
+        // ),
+        // const SizedBox(width: 10),
+        // SizedBox(
+        //   width: 90,
+        //   child: CustomTextFormField(
+        //     label: 'Max Price',
+        //     keyboardType: TextInputType.number,
+        //     onChanged: (value) {
+        //       setState(() {
+        //         maxPrice = double.tryParse(value) ?? double.infinity;
+        //       });
+        //       searchProcess('');
+        //     },
+        //   ),
+        // ),
       ],
     );
   }
 
-  Future<void> filterProducts(String query) async {
+  Future<void> searchProcess(String query) async {
     var sqlHelper = GetIt.I.get<SqlHelper>();
     var result = await sqlHelper.db!.rawQuery("""
                SELECT * FROM products
-               WHERE (name LIKE '%$query%' OR description LIKE '%$query%' OR price LIKE '%$query%')
-               AND price >= $minPrice AND price <= $maxPrice;
+               WHERE name LIKE '%$query%' OR description LIKE '%$query%' OR price LIKE '%$query%'
               """);
     setState(() {
       products = result
           .map((map) => Product(
-              name: map['name'] as String,
-              description: map["description"] as String,
-              price: map["price"] as double))
+                name: map['name'] as String,
+                description: map["description"] as String,
+                price: map["price"] as double,
+                id: map['id'] as int,
+                image: map['image'] as String,
+                isAvailable: map['isAvailable'] == 1 ? true : false,
+                stock: map['stock'] as int,
+                categoryDesc: map['categoryDesc'] as String,
+                categoryId: map['categoryId'] as int,
+                categoryName: map['categoryName'] as String,
+              ))
           .toList();
     });
   }

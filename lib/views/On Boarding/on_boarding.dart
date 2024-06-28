@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:animate_do/animate_do.dart';
-import 'package:easy_pos_r5/views/home_view.dart';
+import 'package:easy_pos_r5/views/Home/home_view.dart';
+
 import 'package:easy_pos_r5/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 
@@ -13,16 +16,27 @@ class OnBoarding extends StatefulWidget {
 class _OnBoardingState extends State<OnBoarding> {
   late PageController _pageController;
   int _pageIndex = 0;
-
+  late Timer _timer;
   @override
   void initState() {
     _pageController = PageController(initialPage: 0);
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_pageIndex < demoData.length - 1) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+      } else {
+        timer.cancel();
+      }
+    });
     super.initState();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -69,9 +83,6 @@ class _OnBoardingState extends State<OnBoarding> {
                     child: FadeInRight(
                       child: CustomElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.ease);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -131,21 +142,27 @@ class Onboard {
 
 final List<Onboard> demoData = [
   Onboard(
-      title: ' Welcome To\nEasy Pos',
-      image: 'assets/images/deal.png',
+      title: ' Welcome To \n Easy Pos',
+      image: 'assets/images/welcome.jpg',
       description:
-          "This is a software solution used by businesses \n to manage sales transactions."),
+          "Software solution tool used by businesses \n to manage sales transactions."),
   Onboard(
-    title: ' Generate receipts',
-    image: 'assets/images/receipt.png',
-    description: 'You can Generate receipts any time and \nevery where..',
+    title: ' Create Invoices',
+    image: 'assets/images/invoices.jpg',
+    description: 'Create Professional invoices in a minute!',
+  ),
+
+  Onboard(
+    title: ' Manage Clients',
+    image: 'assets/images/clients.jpg',
+    description: 'Manage clients in a flexible way!',
   ),
   Onboard(
-    title: ' Analyze sales data',
-    image: 'assets/images/analyse.png',
-    description:
-        'Easy Pos streamlines the checkout process and enhances overall efficiency. 🛒💼 ',
+    title: ' Build Orders',
+    image: 'assets/images/orders.jpg',
+    description: 'Build your selling items!',
   ),
+
 ];
 
 class OnBoardingContent extends StatelessWidget {
@@ -166,7 +183,9 @@ class OnBoardingContent extends StatelessWidget {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: TextStyle(fontWeight:FontWeight.w700,fontSize:30,color: Theme.of(context).primaryColor
+          style: TextStyle(
+            fontSize:30,
+            color: Theme.of(context).primaryColor,
           ),
               ),
         const Spacer(),

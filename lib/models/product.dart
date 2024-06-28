@@ -10,7 +10,18 @@ class Product {
   String? categoryName;
   String? categoryDesc;
 
-  Product({required this.name,required this.description,required this.price});
+  Product({
+    this.name,
+    this.description,
+    this.price,
+    this.id,
+    this.categoryDesc,
+    this.categoryName,
+    this.categoryId,
+    this.isAvailable,
+    this.stock,
+    this.image,
+  });
 
   Product.fromJson(Map<String, dynamic> data) {
     id = data["id"];

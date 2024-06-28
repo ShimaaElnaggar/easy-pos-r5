@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
@@ -11,6 +12,7 @@ class SqlHelper {
         var factory = databaseFactoryFfiWeb;
         db = await factory.openDatabase('pos.db');
       } else {
+
         db = await openDatabase('pos.db', version: 1,
             onCreate: (Database db, int version) {
           print("Database created successfully");
@@ -75,7 +77,6 @@ class SqlHelper {
           createdAtDate TEXT,
           createdAtTime TEXT,
           clientId INTEGER NOT NULL,
-          paymentStatus TEXT,
           foreign key(clientId) references clients(id)
           on delete restrict
           ) 
@@ -86,7 +87,6 @@ class SqlHelper {
          orderId INTEGER,
          productCount INTEGER,
          productId INTEGER,
-         isPaid Real,
           foreign key(productId) references products(id)
           on delete restrict
           ) 
@@ -110,4 +110,6 @@ class SqlHelper {
       return false;
     }
   }
+
+
 }

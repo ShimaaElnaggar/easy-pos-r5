@@ -1,7 +1,8 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/client_data_model.dart';
-import 'package:easy_pos_r5/views/clients_operations.dart';
+import 'package:easy_pos_r5/views/Clients%20Operations/clients_operations.dart';
 import 'package:easy_pos_r5/widgets/custom_appbar.dart';
 import 'package:easy_pos_r5/widgets/custom_data_table.dart';
 import 'package:easy_pos_r5/widgets/custom_text_form_field.dart';
@@ -19,6 +20,7 @@ class _ClientsViewState extends State<ClientsView> {
   List<ClientData>? clients;
   int sortColumnIndex = 0;
   bool sortValue = true;
+  @override
   void initState() {
     getClients();
     super.initState();
@@ -154,21 +156,23 @@ class _ClientsViewState extends State<ClientsView> {
   CustomTextFormField search(BuildContext context) {
     return CustomTextFormField(
       onChanged: (value) async {
-        await filterClients(value);
+        await searchProcess(value);
       },
       textInputAction: TextInputAction.done,
       keyboardType: TextInputType.text,
       prefixIcon: IconButton(
           onPressed: () {},
-          icon: Icon(
-            Icons.search,
-            color: Theme.of(context).primaryColor,
+          icon: FadeInLeft(
+            child: Icon(
+              Icons.search,
+              color: Theme.of(context).primaryColor,
+            ),
           )),
       label: "Search",
     );
   }
 
-  Future<void> filterClients(String query) async {
+  Future<void> searchProcess(String query) async {
     var sqlHelper = GetIt.I.get<SqlHelper>();
     var result = await sqlHelper.db!.rawQuery("""
                SELECT * FROM clients
@@ -178,6 +182,9 @@ class _ClientsViewState extends State<ClientsView> {
       clients = result
           .map((map) => ClientData(
                 name: map['name'] as String,
+        id: map['id'] as int,
+        phone: map['phone'] as String,
+        address: map['name'] as String,
               ))
           .toList();
     });

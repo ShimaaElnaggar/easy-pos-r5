@@ -12,7 +12,7 @@ class ClientData{
 
   }
 
-  ClientData({required this.name});
+  ClientData({ this.name,this.id,this.phone,this.address});
 
   Map<String,dynamic> toJson(){
     return{

@@ -1,7 +1,7 @@
-enum PaymentStatus {
-  paid,
-  notPaid,
-}
+// enum PaymentStatus {
+//   paid,
+//   notPaid,
+// }
 class Order {
   int? id;
   String? label;
@@ -14,7 +14,7 @@ class Order {
   String? clientAddress;
   String? createdAtDate;
   String? createdAtTime;
-  PaymentStatus? paymentStatus;
+  //PaymentStatus? paymentStatus;
 
   Order({required this.label,required this.paidPrice});
 
@@ -31,7 +31,7 @@ class Order {
     clientAddress = data["clientAddress"];
     createdAtDate =data['createdAtDate'];
     createdAtTime =data['createdAtTime'];
-    paymentStatus = data['paymentStatus'] == 'paid' ? PaymentStatus.paid : PaymentStatus.notPaid;
+    //paymentStatus = data['paymentStatus'] == 'paid' ? PaymentStatus.paid : PaymentStatus.notPaid;
   }
 
   Map<String, dynamic> toJson() {
@@ -44,7 +44,7 @@ class Order {
       "clientId": clientId,
       'createdAtDate':createdAtDate,
       'createdAtTime':createdAtTime,
-      'paymentStatus': paymentStatus == PaymentStatus.paid ? 'paid' : 'notPaid',
+     // 'paymentStatus': paymentStatus == PaymentStatus.paid ? 'paid' : 'notPaid',
     };
   }
 }

@@ -1,23 +1,23 @@
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
+import 'package:easy_pos_r5/views/Splash/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'views/home_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  var sqlHelper = SqlHelper();
+
+  SqlHelper sqlHelper = SqlHelper();
   await sqlHelper.init();
-  print("db: ${sqlHelper.db}");
   if (sqlHelper.db != null) {
     GetIt.I.registerSingleton(sqlHelper);
   }
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeView(),
+      home: const Splash(),
     );
   }
 
@@ -50,7 +50,6 @@ class MyApp extends StatelessWidget {
     final Map<int, Color> shades = {
       50: Color.fromARGB(alpha, red, green, blue),
       100: Color.fromARGB(alpha, red, green, blue),
-      // Add more shades as needed (e.g., 200, 300, etc.)
     };
 
     return MaterialColor(color.value, shades);

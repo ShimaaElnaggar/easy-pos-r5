@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/client_data_model.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +20,7 @@ class _ClientsDropDownState extends State<ClientsDropDown> {
     getClients();
     super.initState();
   }
+
   void getClients() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -69,8 +69,7 @@ class _ClientsDropDownState extends State<ClientsDropDown> {
                     value: widget.selectedValue,
                     hint: const Text(
                       " Unnamed client ",
-                      style:
-                          TextStyle(fontSize: 16,color:  Colors.black),
+                      style: TextStyle(fontSize: 16, color: Colors.black),
                     ),
                     items: [
                       for (var client in clients!)

@@ -1,11 +1,12 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:easy_pos_r5/helpers/sql_helper.dart';
 import 'package:easy_pos_r5/models/exchange_rate_model.dart';
 import 'package:easy_pos_r5/models/order_model.dart';
-import 'package:easy_pos_r5/views/all_sales_view.dart';
-import 'package:easy_pos_r5/views/categories_view.dart';
-import 'package:easy_pos_r5/views/clients_view.dart';
-import 'package:easy_pos_r5/views/products_view.dart';
-import 'package:easy_pos_r5/views/sales_ops_view.dart';
+import 'package:easy_pos_r5/views/All%20Sales/all_sales_view.dart';
+import 'package:easy_pos_r5/views/Categories/categories_view.dart';
+import 'package:easy_pos_r5/views/Clients/clients_view.dart';
+import 'package:easy_pos_r5/views/Products/products_view.dart';
+import 'package:easy_pos_r5/views/Sales%20Operations/sales_ops_view.dart';
 import 'package:easy_pos_r5/widgets/card_header_item.dart';
 import 'package:easy_pos_r5/widgets/grid_view_item.dart';
 import 'package:flutter/foundation.dart';
@@ -14,7 +15,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({ super.key});
+  const HomeView({super.key});
   @override
   State<HomeView> createState() => _HomeViewState();
 }
@@ -25,6 +26,7 @@ class _HomeViewState extends State<HomeView> {
   List<ExchangeRate>? exchangeRates;
   List<Order>? orders;
   double totalSales = 0;
+
   @override
   void initState() {
     initTables();
@@ -35,10 +37,7 @@ class _HomeViewState extends State<HomeView> {
     var sqlHelper = GetIt.I.get<SqlHelper>();
     isTableInitialized = await sqlHelper.createTables();
     isLoading = false;
-    setState(() {
-
-    });
-
+    setState(() {});
     await insertRate();
     getExchangeRate();
     getOrders();
@@ -87,7 +86,7 @@ class _HomeViewState extends State<HomeView> {
         for (var item in data) {
           orders!.add(Order.fromJson(item));
         }
-        calculateTodaySales(); // Recalculate totalSales after adding orders
+        calculateTodaySales();
       } else {
         orders = [];
       }
@@ -95,13 +94,37 @@ class _HomeViewState extends State<HomeView> {
       print('Error In get data $e');
       orders = [];
     }
+    setState(() {});
+  }
+
+  Future<double> calculateTodaySales() async {
+    DateTime now = DateTime.now();
+    String currentDate = DateFormat('dd-MM-yyyy').format(now);
+    var sqlHelper = GetIt.I.get<SqlHelper>();
+    var result = await sqlHelper.db!.query(
+      'orders',
+      columns: ['paidPrice'],
+      where: 'createdAtDate = ?',
+      whereArgs: [currentDate],
+    );
+
+    double calculatedTotalSales = 0;
+
+    for (var row in result) {
+      calculatedTotalSales += (row['paidPrice'] as double);
+    }
+
+    setState(() {
+      totalSales = calculatedTotalSales;
+      print('Rebuilding widget with totalSales: $totalSales');
+    });
+    return totalSales;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfffafafa),
-      drawer: const Drawer(),
       appBar: AppBar(),
       body: Column(
         children: [
@@ -138,11 +161,13 @@ class _HomeViewState extends State<HomeView> {
                                     ? const CircularProgressIndicator(
                                         color: Colors.white,
                                       )
-                                    : CircleAvatar(
-                                        radius: 10,
-                                        backgroundColor: isTableInitialized
-                                            ? Colors.green
-                                            : Colors.red,
+                                    : ShakeY(
+                                        child: CircleAvatar(
+                                          radius: 10,
+                                          backgroundColor: isTableInitialized
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
                                       ),
                               ),
                             ),
@@ -154,26 +179,28 @@ class _HomeViewState extends State<HomeView> {
                         if (exchangeRates != null && exchangeRates!.isNotEmpty)
                           CardHeaderItem(
                             title: "Exchange Rate",
-                            subTitle: isLoading ?
-                            'Calculating...' : '1'
-                                ' '
-                                '${exchangeRates![0].currencyFrom.toString()}'
-                                ' '
-                                '='
-                                ' '
-                                ' ${exchangeRates![0].rate.toString()}'
-                                ' '
-                                '${exchangeRates![0].currencyTo.toString()}',
+                            subTitle: isLoading
+                                ? 'Calculating...'
+                                : '1'
+                                    ' '
+                                    '${exchangeRates![0].currencyFrom.toString()}'
+                                    ' '
+                                    '='
+                                    ' '
+                                    ' ${exchangeRates![0].rate.toString()}'
+                                    ' '
+                                    '${exchangeRates![0].currencyTo.toString()}',
                           ),
                         const SizedBox(
-                            height: 5,
-
-                          ),
+                          height: 5,
+                        ),
                         CardHeaderItem(
                           title: "Today's Sales",
-                          subTitle: isLoading ?
-                          'Calculating...' :
-                          (orders != null ? totalSales.toString() : 'No orders available'),
+                          subTitle: isLoading
+                              ? 'Calculating...'
+                              : (orders != null
+                                  ? '${totalSales.toStringAsFixed(2)} EGP'
+                                  : 'No orders available'),
                         ),
                       ],
                     ),
@@ -190,56 +217,66 @@ class _HomeViewState extends State<HomeView> {
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 20,
                 children: [
-                  GridViewItem(
-                    iconData: Icons.calculate,
-                    color: Colors.orange,
-                    title: "All Sales",
-                    onTab: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const AllSales(),
-                      ));
-                    },
+                  FadeInDown(
+                    child: GridViewItem(
+                      iconData: Icons.calculate,
+                      color: Colors.orange,
+                      title: "All Sales",
+                      onTab: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const AllSales(),
+                        ));
+                      },
+                    ),
                   ),
-                  GridViewItem(
-                    iconData: Icons.inventory_2,
-                    color: Colors.pink,
-                    title: "Products",
-                    onTab: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ProductsView()));
-                    },
+                  FadeInUp(
+                    child: GridViewItem(
+                      iconData: Icons.inventory_2,
+                      color: Colors.pink,
+                      title: "Products",
+                      onTab: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ProductsView()));
+                      },
+                    ),
                   ),
-                  GridViewItem(
-                    iconData: Icons.groups,
-                    color: Colors.lightBlue,
-                    title: "Clients",
-                    onTab: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const ClientsView(),
-                      ));
-                    },
+                  FadeInRight(
+                    child: GridViewItem(
+                      iconData: Icons.groups,
+                      color: Colors.lightBlue,
+                      title: "Clients",
+                      onTab: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const ClientsView(),
+                        ));
+                      },
+                    ),
                   ),
-                  GridViewItem(
-                    iconData: Icons.point_of_sale,
-                    color: Colors.green,
-                    title: "New Sale",
-                    onTab: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const SalesOpsView(),
-                      ));
-                    },
+                  FadeInLeft(
+                    child: GridViewItem(
+                      iconData: Icons.point_of_sale,
+                      color: Colors.green,
+                      title: "New Sale",
+                      onTab: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const SalesOpsView(),
+                        ));
+                      },
+                    ),
                   ),
-                  GridViewItem(
-                    iconData: Icons.category,
-                    color: Colors.yellow,
-                    title: "Categories",
-                    onTab: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const CategoriesView(),
-                      ));
-                    },
+                  FadeInRight(
+                    child: GridViewItem(
+                      iconData: Icons.category,
+                      color: Colors.yellow,
+                      title: "Categories",
+                      onTab: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const CategoriesView(),
+                        ));
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -253,8 +290,7 @@ class _HomeViewState extends State<HomeView> {
   Future<void> insertRate() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
-      await sqlHelper.db!.insert(
-          'exchangeRate', {
+      await sqlHelper.db!.insert('exchangeRate', {
         'currencyFrom': 'USD',
         'currencyTo': 'EGP',
         'rate': 47.71,
@@ -277,28 +313,5 @@ class _HomeViewState extends State<HomeView> {
         ),
       );
     }
-  }
-
-  Future<void> calculateTodaySales() async {
-    DateTime now = DateTime.now();
-    String currentDate = DateFormat('dd-MM-yyyy').format(now);
-    var sqlHelper = GetIt.I.get<SqlHelper>();
-    var result = await sqlHelper.db!.query(
-      'orders',
-      columns: ['paidPrice'],
-      where: 'createdAtDate = ?',
-      whereArgs: [currentDate],
-    );
-
-    double totalSales = 0;
-
-    for (var row in result) {
-      totalSales += row['paidPrice'] as double;
-    }
-
-    setState(() {
-      this.totalSales = totalSales;
-      print('Rebuilding widget with totalSales: $totalSales');
-    });
   }
 }
